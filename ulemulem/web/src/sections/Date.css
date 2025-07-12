@@ -1,0 +1,26 @@
+.date {
+  gap: 1rem;
+}
+
+.date__date {
+  font-size: 2rem;
+}
+
+.date__info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-direction: column;
+}
+
+.date__info .date__text,
+.date__info .date__time-field {
+  opacity: 0.5 !important;
+}
+
+@media (min-width: 768px) {
+  .date__date {
+    font-size: 4rem;
+  }
+}

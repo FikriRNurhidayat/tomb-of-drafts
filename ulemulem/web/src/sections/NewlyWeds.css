@@ -1,0 +1,47 @@
+.newlyweds {
+  gap: 1rem;
+}
+
+.newlyweds__info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.newlyweds__ampersand {
+  font-family: var(--main-font);
+  font-style: italic;
+  font-size: 2rem;
+}
+
+.newlyweds__parents {
+  font-family: var(--main-font) !important;
+  font-style: italic;
+  opacity: .5 !important;
+}
+
+.newlyweds__info .field {
+  opacity: .5 !important;
+}
+
+@media (min-width: 768px) {
+  .newlyweds {
+    gap: 2rem;
+  }
+
+  .newlyweds__name {
+    font-size: 4rem;
+  }
+
+  .newlyweds__ampersand {
+    font-size: 4rem;
+  }
+
+  .newlyweds__parents {
+    font-size: 1.5rem;
+    letter-spacing: 0.375rem;
+  }
+
+}

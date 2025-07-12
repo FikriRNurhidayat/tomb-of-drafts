@@ -1,0 +1,8 @@
+.greeting {
+  gap: 1rem;
+}
+
+.greeting__text {
+  max-width: 48rem;
+  text-align: center;
+}

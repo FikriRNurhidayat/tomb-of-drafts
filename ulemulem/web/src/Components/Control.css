@@ -1,0 +1,34 @@
+.control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.control {
+  font-size: 1.5rem;
+  user-select: none !important;
+}
+
+.control a {
+  opacity: .5 !important;
+  user-select: none !important;
+}
+
+.control a:hover {
+  opacity: 1 !important;
+  user-select: none !important;
+}
+
+.control .vertical {
+  display: flex;
+  flex-direction: column;
+  gap: .1rem;
+  text-align: center;
+  user-select: none !important;
+}
+
+.control i {
+  font-size: .75rem;
+  user-select: none !important;
+}

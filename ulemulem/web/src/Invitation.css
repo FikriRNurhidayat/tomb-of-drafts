@@ -1,0 +1,56 @@
+.decorative {
+  font-family: var(--decorative-font);
+}
+
+.field {
+  font-family: var(--main-font);
+  text-transform: uppercase;
+}
+
+.description {
+  font-family: var(--main-font);
+}
+
+.paragraph {
+  font-family: var(--main-font);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .decorative {
+    font-family: var(--decorative-font);
+    letter-spacing: 0.375rem;
+  }
+
+  .field {
+    font-size: 1.25rem;
+    font-family: var(--main-font);
+    letter-spacing: 0.5rem;
+    text-transform: uppercase;
+  }
+
+  .description {
+    font-size: 1.25rem;
+    font-family: var(--main-font);
+    letter-spacing: .125rem !important;
+  }
+
+  .paragraph {
+    font-size: 2rem;
+    font-family: var(--main-font);
+    letter-spacing: unset !important;
+  }
+
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+  }
+}

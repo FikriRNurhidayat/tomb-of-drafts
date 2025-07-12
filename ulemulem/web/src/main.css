@@ -1,0 +1,98 @@
+@import url("https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Great+Vibes&display=swap");
+
+:root {
+  --main-font: "EB Garamond", serif;
+  --decorative-font: "Great Vibes", cursive;
+  --foreground: white;
+  --background: black;
+  --mobile-width: 768px;
+
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: var(--foreground);
+  background-color: var(--background);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  max-width: 48rem;
+  padding: 0;
+  margin: 0 auto;
+  box-sizing: border-box;
+  font-family: var(--main-font);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+b,
+a {
+  padding: 0;
+  margin: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: unset;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+}
+
+section,
+.section {
+  padding: 1.5rem;
+  min-height: 100dvh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+a {
+  color: var(--foreground);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --foreground: black;
+    --background: white;
+  }
+}
+
+@media (min-width: 768px) {
+  section,
+  .section {
+    padding: 6rem 4rem;
+  }
+}

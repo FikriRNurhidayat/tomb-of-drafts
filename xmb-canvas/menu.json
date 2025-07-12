@@ -1,0 +1,246 @@
+[
+  {
+    "name": "Users",
+    "icon": "users.png",
+    "items": [
+      {
+        "name": "Turn Off System",
+        "icon": "power.png"
+      },
+      {
+        "name": "Create New User",
+        "icon": "new-user.png"
+      },
+      {
+        "name": "Chekoy",
+        "icon": "user.png"
+      }
+    ]
+  },
+  {
+    "name": "Settings",
+    "icon": "settings.png",
+    "items": [
+      {
+        "name": "System Update",
+        "icon": "system-update.png"
+      },
+      {
+        "name": "Game Settings",
+        "icon": "game-settings.png"
+      },
+      {
+        "name": "Video Settings",
+        "icon": "video-settings.png"
+      },
+      {
+        "name": "Music Settings",
+        "icon": "music-settings.png"
+      },
+      {
+        "name": "Chat Settings",
+        "icon": "chat-settings.png"
+      },
+      {
+        "name": "Theme Settings",
+        "icon": "theme-settings.png"
+      },
+      {
+        "name": "System Settings",
+        "icon": "system-settings.png"
+      },
+      {
+        "name": "Date and Time Settings",
+        "icon": "date-and-time-settings.png"
+      },
+      {
+        "name": "Power Save Settings",
+        "icon": "power-save-settings.png"
+      },
+      {
+        "name": "Accessory Settings",
+        "icon": "accessory-settings.png"
+      },
+      {
+        "name": "Printer Settings",
+        "icon": "printer-settings.png"
+      },
+      {
+        "name": "Display Settings",
+        "icon": "display-settings.png"
+      },
+      {
+        "name": "Sound Settings",
+        "icon": "sound-settings.png"
+      },
+      {
+        "name": "Security Settings",
+        "icon": "security-settings.png"
+      },
+      {
+        "name": "Remote Play Settings",
+        "icon": "remote-play-settings.png"
+      },
+      {
+        "name": "Network Settings",
+        "icon": "network-settings.png"
+      }
+    ]
+  },
+  {
+    "name": "Photo",
+    "icon": "photo.png",
+    "items": [
+      {
+        "name": "Search for Media Servers",
+        "icon": "search-media-servers.png"
+      },
+      {
+        "name": "Data Disc",
+        "icon": "disc.png"
+      },
+      {
+        "name": "Save Screenshot",
+        "icon": "save-screenshot.png"
+      },
+      {
+        "name": "Memory Stick™",
+        "icon": "memory-stick.png"
+      },
+      {
+        "name": "Playlists",
+        "icon": "playlists.png"
+      }
+    ]
+  },
+  {
+    "name": "Music",
+    "icon": "music.png",
+    "items": [
+      {
+        "name": "Search for Media Servers",
+        "icon": "search-media-servers.png"
+      },
+      {
+        "name": "Audio CD",
+        "icon": "disc.png"
+      },
+      {
+        "name": "Memory Stick™",
+        "icon": "memory-stick.png"
+      },
+      {
+        "name": "Playlists",
+        "icon": "playlists.png"
+      }
+    ]
+  },
+  {
+    "name": "Video",
+    "icon": "video.png",
+    "items": [
+      {
+        "name": "Search for Media Servers",
+        "icon": "search-media-servers.png"
+      },
+      {
+        "name": "BDMV",
+        "desc": "BD-ROM",
+        "icon": "disc.png"
+      },
+      {
+        "name": "Memory Stick™",
+        "icon": "memory-stick.png"
+      }
+    ]
+  },
+  {
+    "name": "Game",
+    "icon": "game.png",
+    "items": [
+      {
+        "name": "Saved Data Utility (PS3™)",
+        "desc": "Chekoy",
+        "icon": "saved-data-utility-ps3.png"
+      },
+      {
+        "name": "God of War III",
+        "icon": "god-of-war-iii.png"
+      }
+    ]
+  },
+  {
+    "name": "Network",
+    "icon": "network.png",
+    "items": [
+      {
+        "name": "Online Instruction Manuals",
+        "icon": "manual.png"
+      },
+      {
+        "name": "Remote Play",
+        "icon": "remote-play.png"
+      },
+      {
+        "name": "Internet Browser",
+        "icon": "internet-browser.png"
+      },
+      {
+        "name": "Internet Search",
+        "icon": "internet-search.png"
+      },
+      {
+        "name": "Download Management",
+        "icon": "download-management.png"
+      }
+    ]
+  },
+  {
+    "name": "PlayStation™Network",
+    "icon": "psn.png",
+    "items": [
+      {
+        "name": "PlayStation®Plus",
+        "icon": "playstation-plus.png"
+      },
+      {
+        "name": "Trophy Collection",
+        "icon": "trophy-collection.png"
+      },
+      {
+        "name": "PlayStation®Store",
+        "icon": "playstation-store.png"
+      }
+    ]
+  },
+  {
+    "name": "Friends",
+    "icon": "friends.png",
+    "items": [
+      {
+        "name": "Block List",
+        "icon": "block-list.png"
+      },
+      {
+        "name": "Add a Friend",
+        "icon": "add-a-friend.png"
+      },
+      {
+        "name": "Players Met",
+        "icon": "players-met.png"
+      },
+      {
+        "name": "Start New Chat",
+        "icon": "start-new-chat.png"
+      },
+      {
+        "name": "Chat Room (Text Only)",
+        "icon": "chat-room.png"
+      },
+      {
+        "name": "Message Box",
+        "icon": "message-box.png"
+      }
+    ]
+  }
+]

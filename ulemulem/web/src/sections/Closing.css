@@ -1,0 +1,8 @@
+.closing {
+  gap: 1rem;
+}
+
+.closing__text {
+  max-width: 48rem;
+  text-align: center;
+}
