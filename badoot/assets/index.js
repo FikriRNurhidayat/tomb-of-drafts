@@ -67,6 +67,8 @@ async function drawGrid(ctx) {
       const x = c * cell;
       const y = r * cell;
       ctx.save();
+      ctx.lineWidth = cell / 16;
+      ctx.storeStyle = foreground;
       ctx.strokeRect(x, y, cell, cell);
       ctx.restore();
     }
@@ -124,16 +126,27 @@ async function drawPips(ctx, suit, rank) {
  */
 async function drawFace(ctx, suit, rank) {
   ctx.save();
-  const image = await loadImage(rank.face.file);
+  const fileName = `suits/${rank.face.name}.${suit.face}.png`;
+  const image = await loadImage(fileName);
   const [tl, tr, br, bl] = rank.face.bounds.map((bound) => getVertex(bound));
   const width = tr[0] - tl[0] + cell;
   const height = bl[1] - tl[1] + cell;
 
   ctx.translate(tl[0], tl[1]);
-  ctx.lineWidth = cell / 8;
   ctx.drawImage(image, 0, 0, width, height);
-  ctx.strokeRect(0, 0, width, height);
   ctx.restore();
+}
+
+/**
+ * @param {CanvasRenderingContext2D} ctx
+ */
+async function drawRank(ctx, suit, rank) {
+  await drawCell(ctx, { x: 4.5, y: 6.5 }, false, async (ctx) => {
+    const size = getSize(cell * 5);
+    ctx.font = `${size}px "${fontFamily}"`;
+    ctx.fillStyle = suit.color;
+    ctx.fillText(rank.name, halfCell, halfCell, size);
+  });
 }
 
 /**
@@ -141,10 +154,10 @@ async function drawFace(ctx, suit, rank) {
  */
 async function drawCard(ctx, suit, rank) {
   await drawBackground(ctx);
-  // await drawGrid(ctx);
   await drawIndeces(ctx, suit, rank);
   if (rank.face) await drawFace(ctx, suit, rank);
   if (Array.isArray(rank.pips)) await drawPips(ctx, suit, rank);
+  // await drawGrid(ctx);
 }
 
 // MAIN
@@ -152,7 +165,8 @@ async function drawCard(ctx, suit, rank) {
 async function main() {
   for (const suit of deck.suites) {
     suit.icon = await loadImage(`suits/${suit.name}.png`);
-    for (const rank of deck.ranks) {
+    for (let i = 0; i < deck.ranks.length; i++) {
+      const rank = deck.ranks[i];
       const canvas = createCanvas(width, height);
       const ctx = canvas.getContext("2d");
 
@@ -164,9 +178,7 @@ async function main() {
         filters: canvas.PNG_FILTER_NONE,
       });
 
-      const isNumber = Number.isInteger(parseInt(rank.name));
-      const rankName = isNumber ? rank.name.padStart(2, "0") : rank.name;
-
+      const rankName = i.toString().padStart(2, "0");
       const fileName = `${suit.name}_${rankName}.png`;
       const filePath = path.join(__dirname, "cards", fileName);
 

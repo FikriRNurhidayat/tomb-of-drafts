@@ -1,7 +1,7 @@
 canvas:
   fontFamily: Jersey 15
-  background: "#e0d3c8"
-  foreground: "#56546e"
+  background: "white"
+  foreground: "#452b3f"
   column: 8
   row: 12
   height: 300
@@ -24,13 +24,17 @@ indeces:
       y: 2
 suites:
   - name: spade
-    color: "#56546e"
+    color: "#452b3f"
+    face: "black"
   - name: club
-    color: "#56546e"
+    color: "#452b3f"
+    face: "black"
   - name: heart
     color: "#f05b5b"
+    face: "red"
   - name: diamond
     color: "#f05b5b"
+    face: "red"
 ranks:
   - name: A
     pips:
@@ -370,77 +374,38 @@ ranks:
         scale: 2
         flip: true
   - name: "J"
-    pips:
-      - coordinate:
-          x: -2
-          y: 3
-        scale: 1.5
-        flip: false
-      - coordinate:
-          x: -2
-          y: 3
-        scale: 1.5
-        flip: true
     face:
-      file: "suits/jack.png"
+      name: "jack"
       bounds:
-        - x: 2
-          y: 2
-        - x: -2
-          y: 2
-        - x: -2
-          y: 2
-        - x: 2
-          y: -2
-        - x: -2
-          y: -2
+        - x: 1
+          y: 1.5
+        - x: -1
+          y: 1.5
+        - x: 1.5
+          y: -1.5
+        - x: -1
+          y: -1.5
   - name: "Q"
-    pips:
-      - coordinate:
-          x: -2
-          y: 3
-        scale: 1.5
-        flip: false
-      - coordinate:
-          x: -2
-          y: 3
-        scale: 1.5
-        flip: true
     face:
-      file: "suits/queen.png"
+      name: "queen"
       bounds:
-        - x: 2
-          y: 2
-        - x: -2
-          y: 2
-        - x: -2
-          y: 2
-        - x: 2
-          y: -2
-        - x: -2
-          y: -2
+        - x: 1
+          y: 1.5
+        - x: -1
+          y: 1.5
+        - x: 1.5
+          y: -1.5
+        - x: -1
+          y: -1.5
   - name: "K"
-    pips:
-      - coordinate:
-          x: -2
-          y: 3
-        scale: 1.5
-        flip: false
-      - coordinate:
-          x: -2
-          y: 3
-        scale: 1.5
-        flip: true
     face:
-      file: "suits/king.png"
+      name: "king"
       bounds:
-        - x: 2
-          y: 2
-        - x: -2
-          y: 2
-        - x: -2
-          y: 2
-        - x: 2
-          y: -2
-        - x: -2
-          y: -2
+        - x: 1
+          y: 1.5
+        - x: -1
+          y: 1.5
+        - x: 1.5
+          y: -1.5
+        - x: -1
+          y: -1.5
