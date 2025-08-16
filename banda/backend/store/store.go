@@ -6,20 +6,17 @@ import (
 	"github.com/fikrirnurhidayat/banda/backend/common/spec"
 )
 
-type Reader interface {
-	Limit(ctx context.Context, value uint) Reader
-	Skip(ctx context.Context, value uint) Reader
-	Sort(ctx context.Context, value string) Reader
-	Search(ctx context.Context)
-	Get(ctx context.Context, spec spec.Spec)
+type Reader[T any] interface {
+	Search(ctx context.Context, spec spec.Spec) ([]T, error)
+	Get(ctx context.Context, spec spec.Spec) (T, error)
 }
 
-type Writer interface {
-	Destroy(ctx context.Context)
-	Save(ctx context.Context)
+type Writer[T any] interface {
+	Destroy(ctx context.Context, spec spec.Spec) error
+	Save(ctx context.Context, entity T) error
 }
 
-type Store interface {
-	Reader
-	Writer
+type Store[T any] interface {
+	Reader[T]
+	Writer[T]
 }
