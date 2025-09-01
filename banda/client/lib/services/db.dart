@@ -1,7 +1,5 @@
-import 'dart:io';
-
 import 'package:path/path.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:sqflite/sqflite.dart';
 
 class DB {
   static final DB _instance = DB._internal();
@@ -52,18 +50,8 @@ class DB {
   }
 
   Future<Database> _init() async {
-    if (Platform.isLinux) {
-      sqfliteFfiInit();
-      final path = join(Directory.current.path, 'bandaio.db');
-      final db = await databaseFactoryFfi.openDatabase(path);
-
-      await _onCreate(db, 1);
-
-      return db;
-    } else {
-      final dbPath = await getDatabasesPath();
-      final path = join(dbPath, 'bandaio.db');
-      return await openDatabase(path, version: 1, onCreate: _onCreate);
-    }
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, 'bandaio.db');
+    return await openDatabase(path, version: 1, onCreate: _onCreate);
   }
 }

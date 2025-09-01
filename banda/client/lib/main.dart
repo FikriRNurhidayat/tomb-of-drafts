@@ -5,14 +5,17 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   final categoryService = await CategoryService.build();
 
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => CategoryProvider(categoryService))
+        ChangeNotifierProvider(
+          create: (_) => CategoryProvider(categoryService),
+        ),
       ],
-      child: const BandaApp()
+      child: const BandaApp(),
     ),
   );
 }
@@ -25,10 +28,9 @@ class BandaApp extends StatelessWidget {
     return MaterialApp(
       title: 'Banda.io',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
-        useMaterial3: true,
-      ),
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      themeMode: ThemeMode.dark,
       home: const MainScreen(),
     );
   }
