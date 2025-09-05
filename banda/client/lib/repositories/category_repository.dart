@@ -1,23 +1,19 @@
 import 'package:banda/entity/category.dart';
-import 'package:banda/services/db.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:uuid/uuid.dart';
+import "package:banda/repositories/repository.dart";
 
-class CategoryService {
-  final Database _db;
+class CategoryRepository extends Repository {
+  CategoryRepository._(super.db);
 
-  CategoryService._(this._db);
-
-  static Future<CategoryService> build() async {
-    final db = await DB().connection;
-    return CategoryService._(db);
+  static Future<CategoryRepository> build() async {
+    final db = await Repository.connect();
+    return CategoryRepository._(db);
   }
 
   Future<Category> create({required String name}) async {
-    final id = Uuid().v4();
+    final id = Repository.getId();
     final now = DateTime.now();
 
-    await _db.insert("categories", {
+    await db.insert("categories", {
       "id": id,
       "name": name,
       "created_at": now.toIso8601String(),
@@ -30,14 +26,14 @@ class CategoryService {
   Future<Category?> update({required String id, required String name}) async {
     final now = DateTime.now();
 
-    await _db.update(
+    await db.update(
       "categories",
       {"name": name, "updated_at": now.toIso8601String()},
       where: "id = ?",
       whereArgs: [id],
     );
 
-    final List<Map> rows = await _db.query(
+    final List<Map> rows = await db.query(
       "categories",
       where: "id = ?",
       whereArgs: [id],
@@ -50,7 +46,7 @@ class CategoryService {
   }
 
   Future<Category?> get(String id) async {
-    final List<Map> rows = await _db.query(
+    final List<Map> rows = await db.query(
       "categories",
       where: "id = ?",
       whereArgs: [id],
@@ -63,11 +59,11 @@ class CategoryService {
   }
 
   Future<List<Category>> search() async {
-    final List<Map> rows = await _db.query("categories");
+    final List<Map> rows = await db.query("categories");
     return rows.map((row) => Category.fromRow(row)).toList();
   }
 
   Future<void> delete(String id) async {
-    await _db.delete("categories", where: "id = ?", whereArgs: [id]);
+    await db.delete("categories", where: "id = ?", whereArgs: [id]);
   }
 }

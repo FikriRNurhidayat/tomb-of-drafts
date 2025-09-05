@@ -1,4 +1,4 @@
-import 'package:path/path.dart';
+// import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DB {
@@ -18,8 +18,9 @@ class DB {
     await db.execute('''
           CREATE TABLE IF NOT EXISTS accounts (
             id TEXT PRIMARY KEY,
-            name TEXT NOT NULL UNIQUE,
+            name TEXT NOT NULL,
             kind TEXT NOT NULL,
+            holder_name TEXT NOT NULL,
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL
           )
@@ -50,8 +51,8 @@ class DB {
   }
 
   Future<Database> _init() async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'bandaio.db');
-    return await openDatabase(path, version: 1, onCreate: _onCreate);
+    // final dbPath = await getDatabasesPath();
+    // final path = join(dbPath, 'bandaio.db');
+    return await openDatabase(inMemoryDatabasePath, version: 1, onCreate: _onCreate);
   }
 }

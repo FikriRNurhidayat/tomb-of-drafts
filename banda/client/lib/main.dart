@@ -1,19 +1,29 @@
+import 'package:banda/providers/account_provider.dart';
 import 'package:banda/providers/category_provider.dart';
-import 'package:banda/services/category_service.dart';
+import 'package:banda/providers/entry_provider.dart';
+import 'package:banda/repositories/account_repository.dart';
+import "package:banda/repositories/category_repository.dart";
+import 'package:banda/repositories/entry_repository.dart';
 import 'package:banda/views/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final categoryService = await CategoryService.build();
+  final categoryRepository = await CategoryRepository.build();
+  final entryRepository = await EntryRepository.build();
+  final accountRepository = await AccountRepository.build();
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => CategoryProvider(categoryService),
+          create: (_) => CategoryProvider(categoryRepository),
         ),
+        ChangeNotifierProvider(
+          create: (_) => AccountProvider(accountRepository),
+        ),
+        ChangeNotifierProvider(create: (_) => EntryProvider(entryRepository)),
       ],
       child: const BandaApp(),
     ),

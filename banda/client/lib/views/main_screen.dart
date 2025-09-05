@@ -1,7 +1,9 @@
 import 'package:banda/routes.dart';
-import 'package:banda/views/create_category_screen.dart';
+import 'package:banda/views/create_account_screen.dart';
 import 'package:banda/views/create_entry_screen.dart';
-import 'package:banda/views/ledger_list_screen.dart';
+import 'package:banda/views/edit_category_screen.dart';
+import 'package:banda/views/list_account_screen.dart';
+import 'package:banda/views/list_ledger_screen.dart';
 import 'package:banda/views/transfer_list_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -14,10 +16,21 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _current = 0;
+
+  final List<String> _titles = [
+    "Ledger",
+    "Transfer",
+    "Account",
+    "Category",
+    "Label",
+    "Trash",
+    "Settings",
+  ];
+
   final List<Widget> _views = [
-    LedgerListScreen(),
+    ListLedgerScreen(),
     TransferListScreen(),
-    Center(child: Text("Account")),
+    ListAccountScreen(),
     Center(child: Text("Category")),
     Center(child: Text("Label")),
     Center(child: Text("Trash")),
@@ -55,9 +68,12 @@ class _MainScreenState extends State<MainScreen> {
     ),
   ];
 
-  FloatingActionButton? _buildFloatingActionButtons(BuildContext context) {
-    switch (_current) {
-      case 0:
+  FloatingActionButton? fab(BuildContext context) {
+    final title = _titles[_current];
+
+    // TODO: Please, refactor!
+    switch (title) {
+      case "Ledger":
         return FloatingActionButton(
           child: const Icon(Icons.add),
           onPressed: () {
@@ -66,6 +82,19 @@ class _MainScreenState extends State<MainScreen> {
               MaterialPageRoute(
                 fullscreenDialog: true,
                 builder: (_) => const CreateEntryScreen(),
+              ),
+            );
+          },
+        );
+      case "Account":
+        return FloatingActionButton(
+          child: const Icon(Icons.add),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                fullscreenDialog: true,
+                builder: (_) => const CreateAccountScreen(),
               ),
             );
           },
@@ -90,6 +119,7 @@ class _MainScreenState extends State<MainScreen> {
             );
           },
         ),
+        title: Text(_titles[_current]),
       ),
       drawer: NavigationDrawer(
         header: Padding(
@@ -114,13 +144,13 @@ class _MainScreenState extends State<MainScreen> {
                 context,
                 MaterialPageRoute(
                   fullscreenDialog: true,
-                  builder: (_) => CreateCategoryScreen(),
+                  builder: (_) => EditCategoryScreen(),
                 ),
               );
               break;
+            case Routes.account:
             case Routes.ledger:
             case Routes.transfer:
-            case Routes.account:
             case Routes.label:
             case Routes.trash:
             case Routes.settings:
@@ -134,16 +164,7 @@ class _MainScreenState extends State<MainScreen> {
         selectedIndex: _current,
         children: _menu,
       ),
-      floatingActionButton: _buildFloatingActionButtons(context),
-      // bottomNavigationBar: NavigationBar(
-      //   destinations: _destinations,
-      //   selectedIndex: _current,
-      //   onDestinationSelected: (selected) {
-      //     setState(() {
-      //       _current = selected;
-      //     });
-      //   },
-      // ),
+      floatingActionButton: fab(context),
     );
   }
 }

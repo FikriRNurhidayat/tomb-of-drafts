@@ -1,16 +1,16 @@
 import 'package:banda/entity/entry.dart';
-import 'package:banda/services/entry_service.dart';
+import 'package:banda/repositories/entry_repository.dart';
 import 'package:banda/widgets/entry_tile.dart';
 import 'package:flutter/material.dart';
 
-class LedgerListScreen extends StatefulWidget {
-  const LedgerListScreen({super.key});
+class ListLedgerScreen extends StatefulWidget {
+  const ListLedgerScreen({super.key});
 
   @override
-  State<StatefulWidget> createState() => _LedgerListScreenState();
+  State<StatefulWidget> createState() => _ListLedgerScreenState();
 }
 
-class _LedgerListScreenState extends State<LedgerListScreen> {
+class _ListLedgerScreenState extends State<ListLedgerScreen> {
   late Future<List<Entry>> _futureEntries;
 
   @override
@@ -20,8 +20,8 @@ class _LedgerListScreenState extends State<LedgerListScreen> {
   }
 
   Future<List<Entry>> _getEntries() async {
-    final entryService = await EntryService.build();
-    return await entryService.search();
+    final entryRepository = await EntryRepository.build();
+    return await entryRepository.search();
   }
 
   @override

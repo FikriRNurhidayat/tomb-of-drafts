@@ -1,16 +1,12 @@
 import 'package:banda/entity/entry.dart';
-import 'package:banda/services/db.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:uuid/v4.dart';
+import 'package:banda/repositories/repository.dart';
 
-class EntryService {
-  final Database _db;
+class EntryRepository extends Repository {
+  EntryRepository._(super.db);
 
-  EntryService._(this._db);
-
-  static Future<EntryService> build() async {
-    final db = await DB().connection;
-    return EntryService._(db);
+  static Future<EntryRepository> build() async {
+    final db = await Repository.connect();
+    return EntryRepository._(db);
   }
 
   Future<Entry> create({
@@ -18,10 +14,10 @@ class EntryService {
     required double amount,
     required EntryStatus status,
     required DateTime timestamp,
-    required String categoryId,
     required String accountId,
+    required String categoryId,
   }) async {
-    final id = UuidV4();
+    final id = Repository.getId();
     final now = DateTime.now();
 
     final category = await _getCategory(categoryId);
@@ -34,27 +30,27 @@ class EntryService {
       throw UnimplementedError();
     }
 
-    await _db.insert("entries", {
-      "id": id.toString(),
+    await db.insert("entries", {
+      "id": id,
       "note": note,
       "amount": amount,
+      "timestamp": timestamp.toIso8601String(),
       "status": status.toString(),
-      "timestamp": timestamp.toString(),
-      "category_id": categoryId,
-      "account_id": accountId,
+      "category_id": category["id"],
+      "account_id": account["id"],
       "created_at": now.toIso8601String(),
       "updated_at": now.toIso8601String(),
     });
 
     return Entry(
-      id: id.toString(),
+      id: id,
       note: note,
       amount: amount,
-      status: status,
       timestamp: timestamp,
-      categoryId: category["id"],
+      status: status,
+      categoryId: categoryId,
       categoryName: category["name"],
-      accountId: account["id"],
+      accountId: accountId,
       accountName: account["name"],
       createdAt: now,
       updatedAt: now,
@@ -72,7 +68,7 @@ class EntryService {
   }) async {
     final now = DateTime.now();
 
-    final updated = await _db.update(
+    final updated = await db.update(
       "entries",
       {
         "note": note,
@@ -95,7 +91,7 @@ class EntryService {
   }
 
   Future<Entry?> get(String id) async {
-    final List<Map> rows = await _db.rawQuery(
+    final List<Map> rows = await db.rawQuery(
       """
       SELECT
         entries.id,
@@ -125,7 +121,7 @@ class EntryService {
   }
 
   Future<List<Entry>> search() async {
-    final List<Map> rows = await _db.rawQuery("""
+    final List<Map> rows = await db.rawQuery("""
       SELECT
         entries.id,
         entries.note,
@@ -146,11 +142,11 @@ class EntryService {
   }
 
   Future<void> delete(String id) async {
-    await _db.delete("categories", where: "id = ?", whereArgs: [id]);
+    await db.delete("entries", where: "id = ?", whereArgs: [id]);
   }
 
   Future<Map?> _getCategory(String id) async {
-    final List<Map> rows = await _db.query(
+    final List<Map> rows = await db.query(
       "categories",
       where: "id = ?",
       whereArgs: [id],
@@ -164,7 +160,7 @@ class EntryService {
   }
 
   Future<Map?> _getAccount(String id) async {
-    final List<Map> rows = await _db.query(
+    final List<Map> rows = await db.query(
       "accounts",
       where: "id = ?",
       whereArgs: [id],

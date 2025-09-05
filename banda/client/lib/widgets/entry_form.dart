@@ -28,7 +28,7 @@ class _EntryFormState extends State<EntryForm> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('Ledger saved')));
-    Navigator.pop(context); // close bottom sheet after saving
+    Navigator.pop(context);
   }
 
   @override
