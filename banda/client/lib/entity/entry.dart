@@ -14,6 +14,7 @@ class Entry {
   final DateTime timestamp;
   final String accountId;
   final String accountName;
+  final String accountHolderName;
   final String categoryId;
   final String categoryName;
   final DateTime createdAt;
@@ -27,6 +28,7 @@ class Entry {
     required this.timestamp,
     required this.accountId,
     required this.accountName,
+    required this.accountHolderName,
     required this.categoryId,
     required this.categoryName,
     required this.createdAt,
@@ -42,6 +44,7 @@ class Entry {
       timestamp: DateTime.parse(row["timestamp"]),
       accountId: row["account_id"],
       accountName: row["account_name"],
+      accountHolderName: row["account_holder_name"],
       categoryId: row["category_id"],
       categoryName: row["category_name"],
       createdAt: DateTime.parse(row["created_at"]),

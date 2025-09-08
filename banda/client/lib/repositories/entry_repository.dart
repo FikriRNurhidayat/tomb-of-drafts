@@ -52,6 +52,7 @@ class EntryRepository extends Repository {
       categoryName: category["name"],
       accountId: accountId,
       accountName: account["name"],
+      accountHolderName: account["holder_name"],
       createdAt: now,
       updatedAt: now,
     );
@@ -100,9 +101,10 @@ class EntryRepository extends Repository {
         entries.timestamp,
         entries.status,
         entries.category_id,
-        categories.name,
+        categories.name AS category_name,
         entries.account_id,
-        accounts.name,
+        accounts.name AS account_name,
+        accounts.holder_name AS account_holder_name,
         entries.created_at,
         entries.updated_at
       FROM entries
@@ -132,6 +134,7 @@ class EntryRepository extends Repository {
           categories.name AS category_name,
           entries.account_id,
           accounts.name AS account_name,
+          accounts.holder_name AS account_holder_name,
           entries.created_at,
           entries.updated_at
         FROM entries
