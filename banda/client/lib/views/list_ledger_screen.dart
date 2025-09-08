@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:banda/entity/entry.dart';
-import 'package:banda/repositories/entry_repository.dart';
+import 'package:banda/providers/entry_provider.dart';
+import 'package:banda/widgets/empty.dart';
 import 'package:banda/widgets/entry_tile.dart';
 import 'package:flutter/material.dart';
+import "package:provider/provider.dart";
 
 class ListLedgerScreen extends StatefulWidget {
   const ListLedgerScreen({super.key});
@@ -11,25 +15,21 @@ class ListLedgerScreen extends StatefulWidget {
 }
 
 class _ListLedgerScreenState extends State<ListLedgerScreen> {
-  late Future<List<Entry>> _futureEntries;
-
-  @override
-  void initState() {
-    super.initState();
-    _futureEntries = _getEntries();
-  }
-
-  Future<List<Entry>> _getEntries() async {
-    final entryRepository = await EntryRepository.build();
-    return await entryRepository.search();
-  }
-
   @override
   Widget build(BuildContext context) {
+    final entryProvider = context.watch<EntryProvider>();
+
     return FutureBuilder(
-      future: _futureEntries,
+      future: entryProvider.search(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Empty(
+              "Ledger entries you add appear here.",
+              icon: Icons.receipt,
+            );
+          }
+
           return ListView.builder(
             itemCount: snapshot.data?.length ?? 0,
             itemBuilder: (BuildContext context, int index) {
@@ -38,6 +38,7 @@ class _ListLedgerScreenState extends State<ListLedgerScreen> {
                 entry.note,
                 amount: entry.amount,
                 category: entry.categoryName,
+                account: entry.accountName,
               );
             },
           );

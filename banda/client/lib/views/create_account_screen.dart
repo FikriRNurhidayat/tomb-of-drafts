@@ -17,7 +17,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   String? holderName;
   String? kind;
 
-  void submit() {
+  void _submit() {
     final accountProvider = context.read<AccountProvider>();
 
     if (_formKey.currentState!.validate()) {
@@ -27,7 +27,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     } else {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("KONTOL")));
+      ).showSnackBar(SnackBar(content: Text("Unknown shit!")));
     }
   }
 
@@ -49,7 +49,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       body: Stack(
         children: [
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            padding: EdgeInsets.all(8),
             child: Form(
               key: _formKey,
               child: Column(
@@ -95,9 +95,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
               ),
             ),
           ),
-          SafeArea(
-            child: Align(
-              alignment: Alignment.bottomCenter,
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: SafeArea(
+              top: false,
               child: Padding(
                 padding: EdgeInsets.all(16),
                 child: SizedBox(
@@ -108,7 +109,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       foregroundColor: theme.colorScheme.onPrimary,
                       padding: EdgeInsets.symmetric(vertical: 16),
                     ),
-                    onPressed: submit,
+                    onPressed: _submit,
                     child: const Text("Add"),
                   ),
                 ),

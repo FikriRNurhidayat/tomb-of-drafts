@@ -35,7 +35,7 @@ class EntryRepository extends Repository {
       "note": note,
       "amount": amount,
       "timestamp": timestamp.toIso8601String(),
-      "status": status.toString(),
+      "status": status.label,
       "category_id": category["id"],
       "account_id": account["id"],
       "created_at": now.toIso8601String(),
@@ -73,7 +73,7 @@ class EntryRepository extends Repository {
       {
         "note": note,
         "amount": amount,
-        "status": status.toString(),
+        "status": status.label,
         "timestamp": timestamp.toString(),
         "category_id": categoryId,
         "account_id": accountId,
@@ -122,22 +122,23 @@ class EntryRepository extends Repository {
 
   Future<List<Entry>> search() async {
     final List<Map> rows = await db.rawQuery("""
-      SELECT
-        entries.id,
-        entries.note,
-        entries.amount,
-        entries.timestamp,
-        entries.status,
-        entries.category_id,
-        categories.name,
-        entries.account_id,
-        accounts.name,
-        entries.created_at,
-        entries.updated_at
-      FROM entries
-      INNER JOIN categories ON categories.id = entries.category_id 
-      INNER JOIN accounts ON accounts.id = entries.account_id 
-      """);
+        SELECT
+          entries.id,
+          entries.note,
+          entries.amount,
+          entries.timestamp,
+          entries.status,
+          entries.category_id,
+          categories.name AS category_name,
+          entries.account_id,
+          accounts.name AS account_name,
+          entries.created_at,
+          entries.updated_at
+        FROM entries
+        INNER JOIN categories ON categories.id = entries.category_id 
+        INNER JOIN accounts ON accounts.id = entries.account_id 
+        """);
+
     return rows.map((row) => Entry.fromRow(row)).toList();
   }
 

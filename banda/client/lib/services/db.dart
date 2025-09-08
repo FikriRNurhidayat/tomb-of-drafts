@@ -1,6 +1,10 @@
 // import 'package:path/path.dart';
+import 'package:banda/entity/account.dart';
+import 'package:banda/entity/entry.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:uuid/uuid.dart';
 
+// NOTE: Please, write your own SQLite binding on the Kotlin
 class DB {
   static final DB _instance = DB._internal();
   static Database? _db;
@@ -12,6 +16,102 @@ class DB {
     if (_db != null) return _db!;
     _db = await _init();
     return _db!;
+  }
+
+  _seed(Database db) async {
+    final List<String> words = ["Purchase", "Rent", "Buy", "Pay", "Lend"];
+    final List<double> units = [1000, 2000, 3000, 4000, 5000, 10000];
+    final List<Map<String, dynamic>> categories =
+        ["Food", "Groceries", "Utilities"]
+            .map(
+              (name) => {
+                "id": Uuid().v4(),
+                "name": name,
+                'created_at': DateTime.now().toIso8601String(),
+                'updated_at': DateTime.now().toIso8601String(),
+              },
+            )
+            .toList();
+
+    final List<Map<String, dynamic>> accounts =
+        [
+          {
+            "name": "BCA",
+            "holder_name": "Fikri Rahmat Nurhidayat",
+            "kind": AccountKind.bankAccount.label,
+          },
+          {
+            "name": "LinkAja",
+            "holder_name": "Fikri Rahmat Nurhidayat",
+            "kind": AccountKind.ewallet.label,
+          },
+          {
+            "name": "GoPay",
+            "holder_name": "Fikri Rahmat Nurhidayat",
+            "kind": AccountKind.ewallet.label,
+          },
+          {
+            "name": "BRI",
+            "holder_name": "Dhea Arintiara",
+            "kind": AccountKind.bankAccount.label,
+          },
+          {
+            "name": "GoPay",
+            "holder_name": "Dhea Arintiara",
+            "kind": AccountKind.ewallet.label,
+          },
+        ].map((a) {
+          a["id"] = Uuid().v4();
+          a["created_at"] = DateTime.now().toIso8601String();
+          a["updated_at"] = DateTime.now().toIso8601String();
+          return a;
+        }).toList();
+
+    await db.transaction((txn) async {
+      final batch = txn.batch();
+
+      for (var category in categories) {
+        batch.insert('categories', category);
+      }
+
+      await batch.commit(noResult: true);
+    });
+
+    await db.transaction((txn) async {
+      final batch = txn.batch();
+
+      for (var account in accounts) {
+        batch.insert('accounts', account);
+      }
+
+      await batch.commit(noResult: true);
+    });
+
+    await db.transaction((txn) async {
+      final batch = txn.batch();
+
+      for (var i = 0; i < 1000; i++) {
+        final unit = units[i % units.length];
+        final word = words[i % words.length];
+        final category = categories[i % categories.length];
+        final account = accounts[i % accounts.length];
+        final status = EntryStatus.values[i % EntryStatus.values.length];
+
+        batch.insert("entries", {
+          "id": Uuid().v4(),
+          "note": "$word ${category["name"]} using ${account["name"]}",
+          "amount": (i + 1) * unit,
+          "timestamp": DateTime.now().toIso8601String(),
+          "status": status.label,
+          "category_id": category["id"],
+          "account_id": account["id"],
+          "created_at": DateTime.now().toIso8601String(),
+          "updated_at": DateTime.now().toIso8601String(),
+        });
+      }
+
+      await batch.commit(noResult: true);
+    });
   }
 
   _onCreate(Database db, int version) async {
@@ -48,11 +148,17 @@ class DB {
             updated_at TEXT NOT NULL
           )
         ''');
+
+    await _seed(db);
   }
 
   Future<Database> _init() async {
     // final dbPath = await getDatabasesPath();
     // final path = join(dbPath, 'bandaio.db');
-    return await openDatabase(inMemoryDatabasePath, version: 1, onCreate: _onCreate);
+    return await openDatabase(
+      inMemoryDatabasePath,
+      version: 1,
+      onCreate: _onCreate,
+    );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:banda/entity/account.dart';
 import 'package:banda/providers/account_provider.dart';
 import 'package:banda/widgets/account_tile.dart';
+import 'package:banda/widgets/empty.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -20,6 +21,10 @@ class _ListAccountScreenState extends State<ListAccountScreen> {
       future: accountProvider.search(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.data!.isEmpty) {
+            return Empty("Accounts you add appear here", icon: Icons.wallet);
+          }
+
           return ListView.builder(
             itemCount: snapshot.data?.length ?? 0,
             itemBuilder: (BuildContext context, int index) {
