@@ -22,7 +22,7 @@ class DB {
     final List<String> words = ["Purchase", "Rent", "Buy", "Pay", "Lend"];
     final List<double> units = [1000, 2000, 3000, 4000, 5000, 10000];
     final List<Map<String, dynamic>> categories =
-        ["Food", "Groceries", "Utilities"]
+        ["Food", "Groceries", "Utilities", "Transfers"]
             .map(
               (name) => {
                 "id": Uuid().v4(),
@@ -90,7 +90,7 @@ class DB {
     await db.transaction((txn) async {
       final batch = txn.batch();
 
-      for (var i = 0; i < 1000; i++) {
+      for (var i = 0; i < 2; i++) {
         final unit = units[i % units.length];
         final word = words[i % words.length];
         final category = categories[i % categories.length];
@@ -105,6 +105,62 @@ class DB {
           "status": status.label,
           "category_id": category["id"],
           "account_id": account["id"],
+          "created_at": DateTime.now().toIso8601String(),
+          "updated_at": DateTime.now().toIso8601String(),
+        });
+      }
+
+      await batch.commit(noResult: true);
+    });
+
+    await db.transaction((txn) async {
+      final batch = txn.batch();
+      final category = categories.firstWhere(
+        (category) => category["name"] == "Transfers",
+      );
+
+      for (var i = 0; i < 2; i++) {
+        final unit = units[i % units.length];
+        final from = accounts[i % accounts.length];
+        final to = accounts[(i + 1) % accounts.length];
+        final status = EntryStatus.values[i % EntryStatus.values.length];
+        final amount = (i + 1) * unit;
+
+        final fromEntry = {
+          "id": Uuid().v4(),
+          "note": "Transfer to ${to["holder_name"]}: ${to["name"]}",
+          "amount": amount * -1,
+          "timestamp": DateTime.now().toIso8601String(),
+          "status": status.label,
+          "category_id": category["id"],
+          "account_id": from["id"],
+          "created_at": DateTime.now().toIso8601String(),
+          "updated_at": DateTime.now().toIso8601String(),
+        };
+
+        final toEntry = {
+          "id": Uuid().v4(),
+          "note": "Transfer from ${from["holder_name"]}: ${from["name"]}",
+          "amount": amount,
+          "timestamp": DateTime.now().toIso8601String(),
+          "status": status.label,
+          "category_id": category["id"],
+          "account_id": to["id"],
+          "created_at": DateTime.now().toIso8601String(),
+          "updated_at": DateTime.now().toIso8601String(),
+        };
+
+        batch.insert("entries", fromEntry);
+        batch.insert("entries", toEntry);
+
+        batch.insert("transfers", {
+          "id": Uuid().v4(),
+          "note":
+              "Transfer from ${from["holder_name"]}: ${from["name"]} to ${to["holder_name"]}: ${to["name"]}",
+          "amount": amount,
+          "timestamp": DateTime.now().toIso8601String(),
+          "from_entry_id": fromEntry["id"],
+          "to_entry_id": toEntry["id"],
           "created_at": DateTime.now().toIso8601String(),
           "updated_at": DateTime.now().toIso8601String(),
         });
@@ -144,6 +200,19 @@ class DB {
             status TEXT NOT NULL,
             category_id TEXT NOT NULL REFERENCES categories (id),
             account_id TEXT NOT NULL REFERENCES accounts (id),
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+          )
+        ''');
+
+    await db.execute('''
+          CREATE TABLE IF NOT EXISTS transfers (
+            id TEXT PRIMARY KEY,
+            note TEXT NOT NULL,
+            amount REAL NOT NULL,
+            timestamp TEXT NOT NULL,
+            from_entry_id TEXT NOT NULL REFERENCES entries (id),
+            to_entry_id TEXT NOT NULL REFERENCES entries (id),
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL
           )

@@ -1,43 +1,35 @@
-import 'package:banda/entity/account.dart';
-import 'package:banda/entity/category.dart';
-import 'package:banda/entity/entry.dart';
 import 'package:banda/providers/account_provider.dart';
-import 'package:banda/providers/category_provider.dart';
-import 'package:banda/providers/entry_provider.dart';
+import 'package:banda/providers/transfer_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class CreateEntryScreen extends StatefulWidget {
-  const CreateEntryScreen({super.key});
+class CreateTransferScreen extends StatefulWidget {
+  const CreateTransferScreen({super.key});
 
   @override
-  State<CreateEntryScreen> createState() => _CreateEntryScreenState();
+  State<CreateTransferScreen> createState() => _CreateTransferScreenState();
 }
 
-class _CreateEntryScreenState extends State<CreateEntryScreen> {
+class _CreateTransferScreenState extends State<CreateTransferScreen> {
   final _formKey = GlobalKey<FormState>();
   final _timestampController = TextEditingController();
 
-  String? _note;
-  EntryStatus? _status;
   double? _amount;
-  String? _categoryId;
-  String? _accountId;
+  String? _fromId;
+  String? _toId;
   DateTime? _timestamp;
 
   void _submit() {
-    final entryProvider = context.read<EntryProvider>();
+    final transferProvider = context.read<TransferProvider>();
 
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      entryProvider.add(
-        note: _note!,
+      transferProvider.add(
         amount: _amount!,
-        status: _status!,
-        categoryId: _categoryId!,
-        accountId: _accountId!,
         timestamp: _timestamp!,
+        fromId: _fromId!,
+        toId: _toId!,
       );
 
       Navigator.pop(context);
@@ -74,7 +66,6 @@ class _CreateEntryScreenState extends State<CreateEntryScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final categoryProvider = context.watch<CategoryProvider>();
     final accountProvider = context.watch<AccountProvider>();
 
     return Scaffold(
@@ -90,10 +81,7 @@ class _CreateEntryScreenState extends State<CreateEntryScreen> {
         ),
       ),
       body: FutureBuilder(
-        future: Future.wait([
-          categoryProvider.search(),
-          accountProvider.search(),
-        ]),
+        future: accountProvider.search(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Text("Error");
@@ -103,8 +91,7 @@ class _CreateEntryScreenState extends State<CreateEntryScreen> {
             return Text("No data");
           }
 
-          final categories = snapshot.data![0] as List<Category>;
-          final accounts = snapshot.data![1] as List<Account>;
+          final accounts = snapshot.data!;
 
           return Stack(
             children: [
@@ -115,17 +102,6 @@ class _CreateEntryScreenState extends State<CreateEntryScreen> {
                   child: Column(
                     spacing: 16,
                     children: [
-                      TextFormField(
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.note),
-                          labelText: "Note",
-                          border: OutlineInputBorder(),
-                        ),
-                        onSaved: (value) => _note = value ?? '',
-                        validator: (value) => value == null || value.isEmpty
-                            ? "Enter note"
-                            : null,
-                      ),
                       TextFormField(
                         decoration: InputDecoration(
                           prefixIcon: Icon(Icons.money),
@@ -163,36 +139,8 @@ class _CreateEntryScreenState extends State<CreateEntryScreen> {
                       ),
                       DropdownButtonFormField(
                         decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.check_circle),
-                          labelText: "Status",
-                          border: OutlineInputBorder(),
-                        ),
-                        items: EntryStatus.values.map((c) {
-                          return DropdownMenuItem(
-                            value: c,
-                            child: Text(c.label),
-                          );
-                        }).toList(),
-                        onChanged: (value) => _status = value,
-                      ),
-                      DropdownButtonFormField(
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.category),
-                          labelText: "Category",
-                          border: OutlineInputBorder(),
-                        ),
-                        items: categories.map((c) {
-                          return DropdownMenuItem(
-                            value: c.id,
-                            child: Text(c.name),
-                          );
-                        }).toList(),
-                        onChanged: (value) => _categoryId = value ?? '',
-                      ),
-                      DropdownButtonFormField(
-                        decoration: InputDecoration(
                           prefixIcon: Icon(Icons.wallet),
-                          labelText: "Account",
+                          labelText: "From",
                           border: OutlineInputBorder(),
                         ),
                         items: accounts.map((i) {
@@ -201,7 +149,21 @@ class _CreateEntryScreenState extends State<CreateEntryScreen> {
                             child: Text("${i.holderName}: ${i.name}"),
                           );
                         }).toList(),
-                        onChanged: (value) => _accountId = value ?? '',
+                        onChanged: (value) => _fromId = value ?? '',
+                      ),
+                      DropdownButtonFormField(
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.wallet),
+                          labelText: "To",
+                          border: OutlineInputBorder(),
+                        ),
+                        items: accounts.map((i) {
+                          return DropdownMenuItem(
+                            value: i.id,
+                            child: Text("${i.holderName}: ${i.name}"),
+                          );
+                        }).toList(),
+                        onChanged: (value) => _toId = value ?? '',
                       ),
                     ],
                   ),

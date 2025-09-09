@@ -1,31 +1,43 @@
 import 'package:banda/widgets/money_text.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class EntryTile extends StatelessWidget {
-  final String account;
+  final DateTime timestamp;
   final String category;
   final String note;
   final double amount;
+  final dateFormatter = DateFormat("d MMMM yyy");
 
-  const EntryTile(
+  EntryTile(
     this.note, {
     super.key,
     required this.amount,
     required this.category,
-    required this.account,
+    required this.timestamp,
   });
+
+  String getDate() {
+    return dateFormatter.format(timestamp);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return ListTile(
-      dense: true,
-      visualDensity: VisualDensity.compact,
-      title: Text(category),
-      subtitle: Text(note, overflow: TextOverflow.ellipsis),
+      title: Text(category, style: theme.textTheme.bodyLarge),
+      subtitle: Text(
+        note,
+        overflow: TextOverflow.ellipsis,
+        style: theme.textTheme.labelSmall,
+      ),
       trailing: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           MoneyText(amount),
-          Text(account),
+          Text(getDate(), style: theme.textTheme.labelSmall),
         ],
       ),
     );

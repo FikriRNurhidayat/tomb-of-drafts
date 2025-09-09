@@ -1,10 +1,11 @@
 import 'package:banda/routes.dart';
 import 'package:banda/views/create_account_screen.dart';
 import 'package:banda/views/create_entry_screen.dart';
+import 'package:banda/views/create_transfer_screen.dart';
 import 'package:banda/views/edit_category_screen.dart';
 import 'package:banda/views/list_account_screen.dart';
 import 'package:banda/views/list_ledger_screen.dart';
-import 'package:banda/views/transfer_list_screen.dart';
+import 'package:banda/views/list_transfer_screen.dart';
 import 'package:flutter/material.dart';
 
 class MainScreen extends StatefulWidget {
@@ -29,7 +30,7 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _views = [
     ListLedgerScreen(),
-    TransferListScreen(),
+    ListTransferScreen(),
     ListAccountScreen(),
     Center(child: Text("Category")),
     Center(child: Text("Label")),
@@ -71,7 +72,6 @@ class _MainScreenState extends State<MainScreen> {
   FloatingActionButton? fab(BuildContext context) {
     final title = _titles[_current];
 
-    // TODO: Please, refactor!
     switch (title) {
       case "Ledger":
         return FloatingActionButton(
@@ -95,6 +95,19 @@ class _MainScreenState extends State<MainScreen> {
               MaterialPageRoute(
                 fullscreenDialog: true,
                 builder: (_) => const CreateAccountScreen(),
+              ),
+            );
+          },
+        );
+      case "Transfer":
+        return FloatingActionButton(
+          child: const Icon(Icons.add),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                fullscreenDialog: true,
+                builder: (_) => const CreateTransferScreen(),
               ),
             );
           },

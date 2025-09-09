@@ -38,7 +38,7 @@ class _ListLedgerScreenState extends State<ListLedgerScreen> {
                 entry.note,
                 amount: entry.amount,
                 category: entry.categoryName,
-                account: "${entry.accountName} (${entry.accountHolderName})",
+                timestamp: entry.timestamp,
               );
             },
           );
