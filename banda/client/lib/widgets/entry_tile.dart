@@ -7,7 +7,7 @@ class EntryTile extends StatelessWidget {
   final String category;
   final String note;
   final double amount;
-  final dateFormatter = DateFormat("d MMMM yyy");
+  final dateFormatter = DateFormat("yyyy/MM/dd");
 
   EntryTile(
     this.note, {
@@ -26,20 +26,25 @@ class EntryTile extends StatelessWidget {
     final theme = Theme.of(context);
 
     return ListTile(
-      title: Text(category, style: theme.textTheme.bodyLarge),
-      subtitle: Text(
-        note,
-        overflow: TextOverflow.ellipsis,
-        style: theme.textTheme.labelSmall,
-      ),
-      trailing: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.end,
+      dense: true,
+      title: Text(category, style: theme.textTheme.titleSmall),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          MoneyText(amount),
-          Text(getDate(), style: theme.textTheme.labelSmall),
+          Text(
+            note,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodySmall,
+          ),
+          Text(
+            getDate(),
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelSmall!.copyWith(fontWeight: FontWeight.w400),
+          ),
         ],
       ),
+      trailing: MoneyText(amount),
     );
   }
 }

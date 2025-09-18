@@ -14,7 +14,7 @@ class MoneyText extends StatelessWidget {
 
   Color getColor(BuildContext context) {
     final theme = Theme.of(context);
-    return amount >= 0 ? theme.colorScheme.primary : theme.colorScheme.error;
+    return amount >= 0 ? theme.colorScheme.onSurface : theme.colorScheme.tertiary;
   }
 
   String formatNumber(num number) {
@@ -34,13 +34,13 @@ class MoneyText extends StatelessWidget {
   }
 
   String getText() {
-    var amountText = formatNumber(amount);
+    final amountText = formatNumber(amount);
     if (useSymbol) {
       var symbol = amount >= 0 ? "+" : "-";
-      return '$symbol $amountText $currency';
+      return '$symbol$amountText';
     }
 
-    return "$amountText $currency";
+    return amountText;
   }
 
   @override
@@ -49,9 +49,7 @@ class MoneyText extends StatelessWidget {
 
     return Text(
       getText(),
-      style: theme.textTheme.titleMedium?.merge(
-        TextStyle(color: getColor(context)),
-      ),
+      style: theme.textTheme.titleSmall!.apply(fontFamily: theme.textTheme.headlineSmall!.fontFamily, color: getColor(context)),
     );
   }
 }

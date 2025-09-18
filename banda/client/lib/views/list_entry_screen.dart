@@ -7,14 +7,14 @@ import 'package:banda/widgets/entry_tile.dart';
 import 'package:flutter/material.dart';
 import "package:provider/provider.dart";
 
-class ListLedgerScreen extends StatefulWidget {
-  const ListLedgerScreen({super.key});
+class ListEntryScreen extends StatefulWidget {
+  const ListEntryScreen({super.key});
 
   @override
-  State<StatefulWidget> createState() => _ListLedgerScreenState();
+  State<StatefulWidget> createState() => _ListEntryScreenState();
 }
 
-class _ListLedgerScreenState extends State<ListLedgerScreen> {
+class _ListEntryScreenState extends State<ListEntryScreen> {
   @override
   Widget build(BuildContext context) {
     final entryProvider = context.watch<EntryProvider>();

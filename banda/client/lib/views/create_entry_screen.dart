@@ -5,6 +5,7 @@ import 'package:banda/providers/account_provider.dart';
 import 'package:banda/providers/category_provider.dart';
 import 'package:banda/providers/entry_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class CreateEntryScreen extends StatefulWidget {
@@ -16,14 +17,17 @@ class CreateEntryScreen extends StatefulWidget {
 
 class _CreateEntryScreenState extends State<CreateEntryScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _timestampController = TextEditingController();
+  final _dateController = TextEditingController();
+  final _timeController = TextEditingController();
+  final _dateFormatter = DateFormat("d MMMM yyyy");
 
   String? _note;
   EntryStatus? _status;
   double? _amount;
   String? _categoryId;
   String? _accountId;
-  DateTime? _timestamp;
+  DateTime? _date;
+  TimeOfDay? _time;
 
   void _submit() {
     final entryProvider = context.read<EntryProvider>();
@@ -31,44 +35,52 @@ class _CreateEntryScreenState extends State<CreateEntryScreen> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
+      final timestamp = DateTime(
+        _date!.year,
+        _date!.month,
+        _date!.day,
+        _time!.hour,
+        _time!.minute,
+      );
+
       entryProvider.add(
         note: _note!,
         amount: _amount!,
         status: _status!,
         categoryId: _categoryId!,
         accountId: _accountId!,
-        timestamp: _timestamp!,
+        timestamp: timestamp,
       );
 
       Navigator.pop(context);
     }
   }
 
-  void _pickTimestamp() async {
+  void _pickDate() async {
     final now = DateTime.now();
     final DateTime? choosenDate = await showDatePicker(
       context: context,
-      initialDate: _timestamp ?? now,
+      initialDate: _date ?? now,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
 
     if (!mounted || choosenDate == null) return;
 
+    _date = choosenDate;
+    _dateController.text = _dateFormatter.format(choosenDate);
+  }
+
+  void _pickTime() async {
     final TimeOfDay? choosenTime = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(now),
+      initialTime: TimeOfDay.now(),
     );
 
     if (!mounted || choosenTime == null) return;
 
-    _timestampController.text = DateTime(
-      choosenDate.year,
-      choosenDate.month,
-      choosenDate.day,
-      choosenTime.hour,
-      choosenTime.minute,
-    ).toIso8601String();
+    _time = choosenTime;
+    _timeController.text = "${choosenTime.hour}:${choosenTime.minute}";
   }
 
   @override
@@ -117,7 +129,6 @@ class _CreateEntryScreenState extends State<CreateEntryScreen> {
                     children: [
                       TextFormField(
                         decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.note),
                           labelText: "Note",
                           border: OutlineInputBorder(),
                         ),
@@ -128,7 +139,6 @@ class _CreateEntryScreenState extends State<CreateEntryScreen> {
                       ),
                       TextFormField(
                         decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.money),
                           labelText: "Amount",
                           border: OutlineInputBorder(),
                         ),
@@ -143,62 +153,87 @@ class _CreateEntryScreenState extends State<CreateEntryScreen> {
                       ),
                       TextFormField(
                         readOnly: true,
-                        controller: _timestampController,
-                        onTap: () => _pickTimestamp(),
+                        controller: _dateController,
+                        onTap: () => _pickDate(),
                         decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.calendar_today),
-                          labelText: "Timestamp",
+                          labelText: "Date",
                           border: OutlineInputBorder(),
                         ),
-                        onSaved: (val) {
-                          if (_timestampController.text.isNotEmpty) {
-                            _timestamp = DateTime.parse(
-                              _timestampController.text,
-                            );
-                          }
-                        },
                         validator: (value) => value == null || value.isEmpty
-                            ? "Enter timestamp"
+                            ? "Select date"
+                            : null,
+                      ),
+                      TextFormField(
+                        readOnly: true,
+                        controller: _timeController,
+                        onTap: () => _pickTime(),
+                        decoration: InputDecoration(
+                          labelText: "Time",
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: (value) => value == null || value.isEmpty
+                            ? "Select time"
                             : null,
                       ),
                       DropdownButtonFormField(
                         decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.check_circle),
                           labelText: "Status",
                           border: OutlineInputBorder(),
                         ),
                         items: EntryStatus.values.map((c) {
                           return DropdownMenuItem(
                             value: c,
-                            child: Text(c.label),
+                            child: Text(
+                              c.label,
+                              style: TextStyle(
+                                fontFamily:
+                                    theme.textTheme.headlineSmall!.fontFamily,
+                                fontWeight:
+                                    theme.textTheme.bodySmall!.fontWeight,
+                              ),
+                            ),
                           );
                         }).toList(),
                         onChanged: (value) => _status = value,
                       ),
                       DropdownButtonFormField(
                         decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.category),
                           labelText: "Category",
                           border: OutlineInputBorder(),
                         ),
                         items: categories.map((c) {
                           return DropdownMenuItem(
                             value: c.id,
-                            child: Text(c.name),
+                            child: Text(
+                              c.name,
+                              style: TextStyle(
+                                fontFamily:
+                                    theme.textTheme.headlineSmall!.fontFamily,
+                                fontWeight:
+                                    theme.textTheme.bodySmall!.fontWeight,
+                              ),
+                            ),
                           );
                         }).toList(),
                         onChanged: (value) => _categoryId = value ?? '',
                       ),
                       DropdownButtonFormField(
                         decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.wallet),
                           labelText: "Account",
                           border: OutlineInputBorder(),
                         ),
                         items: accounts.map((i) {
                           return DropdownMenuItem(
                             value: i.id,
-                            child: Text("${i.holderName}: ${i.name}"),
+                            child: Text(
+                              "${i.holderName}: ${i.name}",
+                              style: TextStyle(
+                                fontFamily:
+                                    theme.textTheme.headlineSmall!.fontFamily,
+                                fontWeight:
+                                    theme.textTheme.bodySmall!.fontWeight,
+                              ),
+                            ),
                           );
                         }).toList(),
                         onChanged: (value) => _accountId = value ?? '',

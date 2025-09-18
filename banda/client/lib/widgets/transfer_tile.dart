@@ -24,7 +24,7 @@ class TransferTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('From', style: theme.textTheme.titleSmall),
-                Text(transfer.fromAccountName, style: theme.textTheme.titleMedium!.apply(color: theme.colorScheme.tertiary)),
+                Text(transfer.fromAccountName, style: theme.textTheme.titleMedium!.apply(fontFamily: theme.textTheme.headlineSmall!.fontFamily, color: theme.colorScheme.error)),
                 Text(
                   transfer.fromAccountHolderName,
                   overflow: TextOverflow.ellipsis,
@@ -58,7 +58,7 @@ class TransferTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('To', style: theme.textTheme.titleSmall),
-                Text(transfer.toAccountName, style: theme.textTheme.titleMedium!.apply(color: theme.colorScheme.tertiary)),
+                Text(transfer.toAccountName, style: theme.textTheme.titleMedium!.apply(fontFamily: theme.textTheme.headlineSmall!.fontFamily, color: theme.colorScheme.primary)),
                 Text(
                   transfer.toAccountHolderName,
                   overflow: TextOverflow.ellipsis,

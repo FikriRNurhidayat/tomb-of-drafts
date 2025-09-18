@@ -3,8 +3,9 @@ import 'package:banda/views/create_account_screen.dart';
 import 'package:banda/views/create_entry_screen.dart';
 import 'package:banda/views/create_transfer_screen.dart';
 import 'package:banda/views/edit_category_screen.dart';
+import 'package:banda/views/edit_label_screen.dart';
 import 'package:banda/views/list_account_screen.dart';
-import 'package:banda/views/list_ledger_screen.dart';
+import 'package:banda/views/list_entry_screen.dart';
 import 'package:banda/views/list_transfer_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -19,54 +20,31 @@ class _MainScreenState extends State<MainScreen> {
   int _current = 0;
 
   final List<String> _titles = [
+    "Overview",
     "Ledger",
     "Transfer",
-    "Account",
+    "Settings",
     "Category",
     "Label",
     "Trash",
-    "Settings",
   ];
 
   final List<Widget> _views = [
-    ListLedgerScreen(),
+    Center(child: Text("Home")),
+    ListEntryScreen(),
     ListTransferScreen(),
+    Center(child: Text("Settings")),
     ListAccountScreen(),
     Center(child: Text("Category")),
     Center(child: Text("Label")),
     Center(child: Text("Trash")),
-    Center(child: Text("Settings")),
   ];
 
   final List<Widget> _menu = [
-    NavigationDrawerDestination(
-      icon: Icon(Icons.receipt),
-      label: const Text("Ledger"),
-    ),
-    NavigationDrawerDestination(
-      icon: Icon(Icons.sync_alt),
-      label: const Text("Transfer"),
-    ),
-    NavigationDrawerDestination(
-      icon: Icon(Icons.wallet),
-      label: const Text("Account"),
-    ),
-    NavigationDrawerDestination(
-      icon: Icon(Icons.category),
-      label: const Text("Category"),
-    ),
-    NavigationDrawerDestination(
-      icon: Icon(Icons.label),
-      label: const Text("Label"),
-    ),
-    NavigationDrawerDestination(
-      icon: Icon(Icons.delete),
-      label: const Text("Trash"),
-    ),
-    NavigationDrawerDestination(
-      icon: Icon(Icons.settings),
-      label: const Text("Settings"),
-    ),
+    NavigationDestination(icon: Icon(Icons.home), label: "Home"),
+    NavigationDestination(icon: Icon(Icons.book), label: "Ledger"),
+    NavigationDestination(icon: Icon(Icons.sync_alt), label: "Transfer"),
+    NavigationDestination(icon: Icon(Icons.settings), label: "Settings"),
   ];
 
   FloatingActionButton? fab(BuildContext context) {
@@ -75,6 +53,7 @@ class _MainScreenState extends State<MainScreen> {
     switch (title) {
       case "Ledger":
         return FloatingActionButton(
+          mini: true,
           child: const Icon(Icons.add),
           onPressed: () {
             Navigator.push(
@@ -88,6 +67,7 @@ class _MainScreenState extends State<MainScreen> {
         );
       case "Account":
         return FloatingActionButton(
+          mini: true,
           child: const Icon(Icons.add),
           onPressed: () {
             Navigator.push(
@@ -101,6 +81,7 @@ class _MainScreenState extends State<MainScreen> {
         );
       case "Transfer":
         return FloatingActionButton(
+          mini: true,
           child: const Icon(Icons.add),
           onPressed: () {
             Navigator.push(
@@ -119,63 +100,21 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       body: _views[_current],
       appBar: AppBar(
-        leading: Builder(
-          builder: (context) {
-            return IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: () {
-                Scaffold.of(context).openDrawer();
-              },
-            );
-          },
-        ),
-        title: Text(_titles[_current]),
+        title: Text(_titles[_current], style: theme.textTheme.headlineSmall, textAlign: TextAlign.center),
+        centerTitle: true,
       ),
-      drawer: NavigationDrawer(
-        header: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Text(
-                "Banda.io",
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-        ),
-        onDestinationSelected: (selected) {
-          final route = Routes.values[selected];
-
-          Navigator.of(context).pop();
-
-          switch (route) {
-            case Routes.category:
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  fullscreenDialog: true,
-                  builder: (_) => EditCategoryScreen(),
-                ),
-              );
-              break;
-            case Routes.account:
-            case Routes.ledger:
-            case Routes.transfer:
-            case Routes.label:
-            case Routes.trash:
-            case Routes.settings:
-              setState(() {
-                _current = selected;
-              });
-
-              break;
-          }
+      bottomNavigationBar: NavigationBar(
+        destinations: _menu,
+        onDestinationSelected: (value) {
+          setState(() {
+            _current = value;
+          });
         },
-        selectedIndex: _current,
-        children: _menu,
       ),
       floatingActionButton: fab(context),
     );

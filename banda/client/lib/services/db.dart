@@ -218,6 +218,25 @@ class DB {
           )
         ''');
 
+    await db.execute('''
+          CREATE TABLE IF NOT EXISTS labels (
+            id TEXT PRIMARY KEY,
+            name TEXT UNIQUE NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+          )
+        ''');
+
+    await db.execute('''
+          CREATE TABLE IF NOT EXISTS entry_labels (
+            entry_id TEXT NOT NULL,
+            label_id TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            PRIMARY KEY (entry_id, label_id)
+          )
+        ''');
+
     await _seed(db);
   }
 
