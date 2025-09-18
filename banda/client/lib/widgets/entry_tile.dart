@@ -7,10 +7,7 @@ class EntryTile extends StatelessWidget {
   final Entry entry;
   final dateFormatter = DateFormat("yyyy/MM/dd");
 
-  EntryTile(
-    this.entry, {
-    super.key,
-  });
+  EntryTile(this.entry, {super.key});
 
   String getDate() {
     return dateFormatter.format(entry.timestamp);
@@ -22,6 +19,24 @@ class EntryTile extends StatelessWidget {
 
     return ListTile(
       dense: true,
+      onLongPress: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            fullscreenDialog: true,
+            builder: (_) => Center(child: const Text("Transaction action contexts")),
+          ),
+        );
+      },
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            fullscreenDialog: true,
+            builder: (_) => Center(child: const Text("Transaction Detail")),
+          ),
+        );
+      },
       title: Text(entry.categoryName, style: theme.textTheme.titleSmall),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -35,7 +50,9 @@ class EntryTile extends StatelessWidget {
           Text(
             getDate(),
             overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.labelSmall!.copyWith(fontWeight: FontWeight.w400),
+            style: theme.textTheme.labelSmall!.copyWith(
+              fontWeight: FontWeight.w400,
+            ),
           ),
         ],
       ),

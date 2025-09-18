@@ -12,6 +12,10 @@ class MoneyText extends StatelessWidget {
     this.useSymbol = true,
   });
 
+  IconData getSign() {
+    return amount >= 0 ? Icons.add : Icons.remove;
+  }
+
   Color getColor(BuildContext context) {
     final theme = Theme.of(context);
     return amount >= 0
@@ -19,43 +23,72 @@ class MoneyText extends StatelessWidget {
         : theme.colorScheme.tertiary;
   }
 
-  String formatNumber(num number) {
-    final n = number.abs();
-
-    if (n >= 1e9) {
-      return '${(n / 1e9).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')}B';
-    }
-    if (n >= 1e6) {
-      return '${(n / 1e6).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')}M';
-    }
-
-    if (n >= 1e4) {
-      return '${(n / 1e3).toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')}K';
-    }
-
-    return n.toString();
+  String formatAmount(double value) {
+    return value
+        .toStringAsFixed(3)
+        .replaceFirst(RegExp(r'\.?0+$'), ''); // trims .000 / .100 etc.
   }
 
-  String getText() {
-    final amountText = formatNumber(amount);
-    if (useSymbol) {
-      var symbol = amount >= 0 ? "+" : "-";
-      return '$symbol$amountText';
+  String getAmount() {
+    final n = amount.abs();
+
+    if (n >= 1e9) {
+      return '${formatAmount(n / 1e9)}B';
+    }
+    if (n >= 1e6) {
+      return '${formatAmount(n / 1e6)}M';
     }
 
-    return amountText;
+    if (n >= 1e3) {
+      return '${formatAmount(n / 1e3)}K';
+    }
+
+    return n.toStringAsFixed(0);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Text(
-      getText(),
-      style: theme.textTheme.headlineSmall!.apply(
-        fontFamily: theme.textTheme.headlineSmall!.fontFamily,
-        color: getColor(context),
-      ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: useSymbol
+              ? Icon(
+                  getSign(),
+                  size: theme.textTheme.bodySmall!.fontSize,
+                  color: getColor(context),
+                )
+              : null,
+        ),
+        SizedBox(
+          width: 48,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              getAmount(),
+              textAlign: TextAlign.center,
+              style: theme.textTheme.titleMedium!.apply(
+                color: getColor(context),
+                fontFamily: theme.textTheme.headlineSmall!.fontFamily,
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            currency,
+            style: theme.textTheme.bodySmall!.apply(
+              color: getColor(context),
+              fontFamily: theme.textTheme.headlineSmall!.fontFamily,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
