@@ -59,6 +59,37 @@ class _EditLabelScreenState extends State<EditLabelScreen> {
     }
   }
 
+  void delete(Label label) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Please Confirm"),
+          content: const Text(
+            "Are you sure that you want to delete this label?",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                context.read<LabelProvider>().remove(label.id);
+                setState(() => editId = null);
+
+                Navigator.of(context).pop();
+              },
+              child: const Text("Yes"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("No"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Decoration focusDecoration() {
     final theme = Theme.of(context);
 
@@ -116,7 +147,12 @@ class _EditLabelScreenState extends State<EditLabelScreen> {
                 return Container(
                   decoration: isEditing ? focusDecoration() : null,
                   child: ListTile(
-                    leading: Icon(Icons.label),
+                    leading: isEditing
+                        ? GestureDetector(
+                            child: Icon(Icons.delete),
+                            onTap: () => delete(label),
+                          )
+                        : Icon(Icons.label),
                     title: isEditing
                         ? TextField(
                             decoration: null,

@@ -20,7 +20,7 @@ class TransferRepository extends Repository {
     final id = Repository.getId();
     final now = DateTime.now();
 
-    final category = await _getCategoryByName("Transfers");
+    final category = await _getCategoryByName("Transfer");
     if (category == null) {
       throw UnimplementedError();
     }

@@ -1,10 +1,9 @@
 import 'package:banda/views/create_account_screen.dart';
-import 'package:banda/views/create_entry_screen.dart';
+import 'package:banda/views/edit_entry_screen.dart';
 import 'package:banda/views/create_transfer_screen.dart';
 import 'package:banda/views/edit_category_screen.dart';
 import 'package:banda/views/edit_label_screen.dart';
 import 'package:banda/views/list_entry_screen.dart';
-import 'package:banda/views/list_transfer_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 
@@ -57,7 +56,7 @@ class _MainScreenState extends State<MainScreen> {
                   context,
                   MaterialPageRoute(
                     fullscreenDialog: true,
-                    builder: (_) => const CreateEntryScreen(),
+                    builder: (_) => const EditEntryScreen(),
                   ),
                 );
               },

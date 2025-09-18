@@ -1,7 +1,10 @@
 import 'package:banda/entity/entry.dart';
+import 'package:banda/providers/entry_provider.dart';
+import 'package:banda/views/edit_entry_screen.dart';
 import 'package:banda/widgets/money_text.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class EntryTile extends StatelessWidget {
   final Entry entry;
@@ -20,12 +23,34 @@ class EntryTile extends StatelessWidget {
     return ListTile(
       dense: true,
       onLongPress: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            fullscreenDialog: true,
-            builder: (_) => Center(child: const Text("Transaction action contexts")),
-          ),
+        showDialog(
+          context: context,
+          builder: (ctx) {
+            return AlertDialog(
+              title: const Text("Please Confirm"),
+              content: const Text(
+                "Are you sure you want to remove this entry?",
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    final entryProvider = context.read<EntryProvider>();
+
+                    entryProvider.remove(entry.id);
+
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Yes'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('No'),
+                ),
+              ],
+            );
+          },
         );
       },
       onTap: () {
@@ -33,7 +58,7 @@ class EntryTile extends StatelessWidget {
           context,
           MaterialPageRoute(
             fullscreenDialog: true,
-            builder: (_) => Center(child: const Text("Transaction Detail")),
+            builder: (_) => EditEntryScreen(entry: entry),
           ),
         );
       },

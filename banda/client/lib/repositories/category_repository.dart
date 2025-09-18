@@ -16,11 +16,19 @@ class CategoryRepository extends Repository {
     await db.insert("categories", {
       "id": id,
       "name": name,
+      "deletable": 1,
       "created_at": now.toIso8601String(),
       "updated_at": now.toIso8601String(),
     });
 
-    return Category(id: id, name: name, createdAt: now, updatedAt: now);
+    return Category(
+      id: id,
+      name: name,
+      deletable: true,
+      createdAt: now,
+      updatedAt: now,
+      deletedAt: null,
+    );
   }
 
   Future<Category?> update({required String id, required String name}) async {
@@ -29,7 +37,7 @@ class CategoryRepository extends Repository {
     await db.update(
       "categories",
       {"name": name, "updated_at": now.toIso8601String()},
-      where: "id = ?",
+      where: "id = ? AND deleted_at IS NULL",
       whereArgs: [id],
     );
 
@@ -48,7 +56,7 @@ class CategoryRepository extends Repository {
   Future<Category?> get(String id) async {
     final List<Map> rows = await db.query(
       "categories",
-      where: "id = ?",
+      where: "id = ? AND deleted_at IS NULL",
       whereArgs: [id],
     );
     if (rows.isEmpty) {
@@ -59,11 +67,19 @@ class CategoryRepository extends Repository {
   }
 
   Future<List<Category>> search() async {
-    final List<Map> rows = await db.query("categories");
+    final List<Map> rows = await db.query(
+      "categories",
+      where: "deleted_at IS NULL",
+    );
     return rows.map((row) => Category.fromRow(row)).toList();
   }
 
   Future<void> delete(String id) async {
-    await db.delete("categories", where: "id = ?", whereArgs: [id]);
+    await db.update(
+      "categories",
+      {"deleted_at": DateTime.now().toIso8601String()},
+      where: "id = ? AND deletable = TRUE",
+      whereArgs: [id],
+    );
   }
 }

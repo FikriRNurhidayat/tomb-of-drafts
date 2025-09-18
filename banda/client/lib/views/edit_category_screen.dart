@@ -57,6 +57,37 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
     }
   }
 
+  void delete(Category category) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Please Confirm"),
+          content: const Text(
+            "Are you sure that you want to delete this category? It will remove all entries on this category.",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                context.read<CategoryProvider>().remove(category.id);
+                setState(() => editId = null);
+
+                Navigator.of(context).pop();
+              },
+              child: const Text("Yes"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("No"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Decoration focusDecoration() {
     final theme = Theme.of(context);
 
@@ -113,7 +144,12 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
                 return Container(
                   decoration: isEditing ? focusDecoration() : null,
                   child: ListTile(
-                    leading: Icon(Icons.label),
+                    leading: category.deletable && isEditing
+                        ? GestureDetector(
+                            child: Icon(Icons.delete),
+                            onTap: () => delete(category),
+                          )
+                        : Icon(Icons.label),
                     title: isEditing
                         ? TextField(
                             decoration: null,

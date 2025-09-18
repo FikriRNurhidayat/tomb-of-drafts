@@ -30,6 +30,27 @@ class EntryProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> update({
+    required String id,
+    required String note,
+    required double amount,
+    required EntryStatus status,
+    required DateTime timestamp,
+    required String accountId,
+    required String categoryId,
+  }) async {
+    await _repository.update(
+      id: id,
+      note: note,
+      amount: amount,
+      status: status,
+      timestamp: timestamp,
+      accountId: accountId,
+      categoryId: categoryId,
+    );
+    notifyListeners();
+  }
+
   Future<void> remove(String id) async {
     await _repository.delete(id);
     notifyListeners();

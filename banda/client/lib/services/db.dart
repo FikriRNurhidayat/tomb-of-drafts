@@ -22,13 +22,15 @@ class DB {
     final List<String> words = ["Purchase", "Rent", "Buy", "Pay", "Lend"];
     final List<double> units = [1000, 2000, 3000, 4000, 5000, 10000];
     final List<Map<String, dynamic>> categories =
-        ["Food", "Groceries", "Utilities", "Transfers"]
+        ["Food", "Grocery", "Utility", "Transfer"]
             .map(
               (name) => {
                 "id": Uuid().v4(),
                 "name": name,
+                "deletable": 0,
                 'created_at': DateTime.now().toIso8601String(),
                 'updated_at': DateTime.now().toIso8601String(),
+                'deleted_at': null,
               },
             )
             .toList();
@@ -107,6 +109,7 @@ class DB {
           "account_id": account["id"],
           "created_at": DateTime.now().toIso8601String(),
           "updated_at": DateTime.now().toIso8601String(),
+          "deleted_at": null,
         });
       }
 
@@ -116,7 +119,7 @@ class DB {
     await db.transaction((txn) async {
       final batch = txn.batch();
       final category = categories.firstWhere(
-        (category) => category["name"] == "Transfers",
+        (category) => category["name"] == "Transfer",
       );
 
       for (var i = 0; i < 2; i++) {
@@ -136,6 +139,7 @@ class DB {
           "account_id": from["id"],
           "created_at": DateTime.now().toIso8601String(),
           "updated_at": DateTime.now().toIso8601String(),
+          "deleted_at": null
         };
 
         final toEntry = {
@@ -148,6 +152,7 @@ class DB {
           "account_id": to["id"],
           "created_at": DateTime.now().toIso8601String(),
           "updated_at": DateTime.now().toIso8601String(),
+          "deleted_at": null
         };
 
         batch.insert("entries", fromEntry);
@@ -163,6 +168,7 @@ class DB {
           "to_entry_id": toEntry["id"],
           "created_at": DateTime.now().toIso8601String(),
           "updated_at": DateTime.now().toIso8601String(),
+          "deleted_at": null
         });
       }
 
@@ -178,7 +184,8 @@ class DB {
             kind TEXT NOT NULL,
             holder_name TEXT NOT NULL,
             created_at TEXT NOT NULL,
-            updated_at TEXT NOT NULL
+            updated_at TEXT NOT NULL,
+            deleted_at TEXT
           )
         ''');
 
@@ -186,8 +193,10 @@ class DB {
           CREATE TABLE IF NOT EXISTS categories (
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL UNIQUE,
+            deletable BOOLEAN,
             created_at TEXT NOT NULL,
-            updated_at TEXT NOT NULL
+            updated_at TEXT NOT NULL,
+            deleted_at TEXT
           )
         ''');
 
@@ -201,7 +210,8 @@ class DB {
             category_id TEXT NOT NULL REFERENCES categories (id),
             account_id TEXT NOT NULL REFERENCES accounts (id),
             created_at TEXT NOT NULL,
-            updated_at TEXT NOT NULL
+            updated_at TEXT NOT NULL,
+            deleted_at TEXT
           )
         ''');
 
@@ -214,7 +224,8 @@ class DB {
             from_entry_id TEXT NOT NULL REFERENCES entries (id),
             to_entry_id TEXT NOT NULL REFERENCES entries (id),
             created_at TEXT NOT NULL,
-            updated_at TEXT NOT NULL
+            updated_at TEXT NOT NULL,
+            deleted_at TEXT
           )
         ''');
 
@@ -223,7 +234,8 @@ class DB {
             id TEXT PRIMARY KEY,
             name TEXT UNIQUE NOT NULL,
             created_at TEXT NOT NULL,
-            updated_at TEXT NOT NULL
+            updated_at TEXT NOT NULL,
+            deleted_at TEXT
           )
         ''');
 

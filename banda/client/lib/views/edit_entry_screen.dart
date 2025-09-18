@@ -8,19 +8,22 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-class CreateEntryScreen extends StatefulWidget {
-  const CreateEntryScreen({super.key});
+class EditEntryScreen extends StatefulWidget {
+  final Entry? entry;
+
+  const EditEntryScreen({super.key, this.entry});
 
   @override
-  State<CreateEntryScreen> createState() => _CreateEntryScreenState();
+  State<EditEntryScreen> createState() => _EditEntryScreenState();
 }
 
-class _CreateEntryScreenState extends State<CreateEntryScreen> {
+class _EditEntryScreenState extends State<EditEntryScreen> {
   final _formKey = GlobalKey<FormState>();
   final _dateController = TextEditingController();
   final _timeController = TextEditingController();
   final _dateFormatter = DateFormat("d MMMM yyyy");
 
+  String? _id;
   String? _note;
   EntryStatus? _status;
   double? _amount;
@@ -28,6 +31,36 @@ class _CreateEntryScreenState extends State<CreateEntryScreen> {
   String? _accountId;
   DateTime? _date;
   TimeOfDay? _time;
+
+  formatTime(TimeOfDay time) {
+    final hour = time.hour.toString().padLeft(2, '0');
+    final minute = time.minute.toString().padLeft(2, '0');
+    return "$hour:$minute";
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.entry != null) {
+      final entry = widget.entry!;
+      _id = entry.id;
+      _note = entry.note;
+      _status = entry.status;
+      _categoryId = entry.categoryId;
+      _accountId = entry.accountId;
+      _amount = entry.amount;
+      _date = DateTime(
+        entry.timestamp.year,
+        entry.timestamp.month,
+        entry.timestamp.day,
+      );
+      _time = TimeOfDay.fromDateTime(entry.timestamp);
+
+      _dateController.text = _dateFormatter.format(_date!);
+      _timeController.text = formatTime(_time!);
+    }
+  }
 
   void _submit() {
     final entryProvider = context.read<EntryProvider>();
@@ -43,14 +76,28 @@ class _CreateEntryScreenState extends State<CreateEntryScreen> {
         _time!.minute,
       );
 
-      entryProvider.add(
-        note: _note!,
-        amount: _amount!,
-        status: _status!,
-        categoryId: _categoryId!,
-        accountId: _accountId!,
-        timestamp: timestamp,
-      );
+      if (_id == null) {
+        entryProvider.add(
+          note: _note!,
+          amount: _amount!,
+          status: _status!,
+          categoryId: _categoryId!,
+          accountId: _accountId!,
+          timestamp: timestamp,
+        );
+      }
+
+      if (_id != null) {
+        entryProvider.update(
+          id: _id!,
+          note: _note!,
+          amount: _amount!,
+          status: _status!,
+          categoryId: _categoryId!,
+          accountId: _accountId!,
+          timestamp: timestamp,
+        );
+      }
 
       Navigator.pop(context);
     }
@@ -80,7 +127,14 @@ class _CreateEntryScreenState extends State<CreateEntryScreen> {
     if (!mounted || choosenTime == null) return;
 
     _time = choosenTime;
-    _timeController.text = "${choosenTime.hour}:${choosenTime.minute}";
+    _timeController.text = formatTime(choosenTime);
+  }
+
+  @override
+  void dispose() {
+    _dateController.dispose();
+    _timeController.dispose();
+    super.dispose();
   }
 
   @override
@@ -132,6 +186,7 @@ class _CreateEntryScreenState extends State<CreateEntryScreen> {
                           labelText: "Note",
                           border: OutlineInputBorder(),
                         ),
+                        initialValue: _note,
                         onSaved: (value) => _note = value ?? '',
                         validator: (value) => value == null || value.isEmpty
                             ? "Enter note"
@@ -142,6 +197,7 @@ class _CreateEntryScreenState extends State<CreateEntryScreen> {
                           labelText: "Amount",
                           border: OutlineInputBorder(),
                         ),
+                        initialValue: _amount?.toString(),
                         keyboardType: TextInputType.numberWithOptions(
                           signed: true,
                           decimal: true,
@@ -180,6 +236,7 @@ class _CreateEntryScreenState extends State<CreateEntryScreen> {
                           labelText: "Status",
                           border: OutlineInputBorder(),
                         ),
+                        initialValue: _status,
                         items: EntryStatus.values.map((c) {
                           return DropdownMenuItem(
                             value: c,
@@ -201,6 +258,7 @@ class _CreateEntryScreenState extends State<CreateEntryScreen> {
                           labelText: "Category",
                           border: OutlineInputBorder(),
                         ),
+                        initialValue: _categoryId,
                         items: categories.map((c) {
                           return DropdownMenuItem(
                             value: c.id,
@@ -222,6 +280,7 @@ class _CreateEntryScreenState extends State<CreateEntryScreen> {
                           labelText: "Account",
                           border: OutlineInputBorder(),
                         ),
+                        initialValue: _accountId,
                         items: accounts.map((i) {
                           return DropdownMenuItem(
                             value: i.id,
