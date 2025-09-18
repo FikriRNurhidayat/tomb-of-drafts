@@ -105,10 +105,18 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       body: _views[_current],
       appBar: AppBar(
-        title: Text(_titles[_current], style: theme.textTheme.headlineSmall, textAlign: TextAlign.center),
+        title: Text(
+          _titles[_current],
+          style: theme.textTheme.headlineSmall,
+          textAlign: TextAlign.center,
+        ),
         centerTitle: true,
       ),
       bottomNavigationBar: NavigationBar(
+        labelTextStyle: WidgetStateProperty.all(
+          TextStyle(fontFamily: theme.textTheme.headlineSmall!.fontFamily),
+        ),
+        selectedIndex: _current,
         destinations: _menu,
         onDestinationSelected: (value) {
           setState(() {

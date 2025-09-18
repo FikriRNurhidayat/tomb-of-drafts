@@ -89,7 +89,7 @@ class BandaApp extends StatelessWidget {
           labelSmall: dark.textTheme.labelSmall!.copyWith( fontFamily: 'RobotoCondensed',),
         ),
       ),
-      themeMode: ThemeMode.light,
+      themeMode: ThemeMode.system,
       home: const MainScreen(),
     );
   }

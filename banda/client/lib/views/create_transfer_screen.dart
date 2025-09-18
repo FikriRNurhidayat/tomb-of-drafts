@@ -1,6 +1,7 @@
 import 'package:banda/providers/account_provider.dart';
 import 'package:banda/providers/transfer_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class CreateTransferScreen extends StatefulWidget {
@@ -12,12 +13,15 @@ class CreateTransferScreen extends StatefulWidget {
 
 class _CreateTransferScreenState extends State<CreateTransferScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _timestampController = TextEditingController();
+  final _dateController = TextEditingController();
+  final _timeController = TextEditingController();
+  final _dateFormatter = DateFormat("d MMMM yyyy");
 
   double? _amount;
   String? _fromId;
   String? _toId;
-  DateTime? _timestamp;
+  DateTime? _date;
+  TimeOfDay? _time;
 
   void _submit() {
     final transferProvider = context.read<TransferProvider>();
@@ -25,9 +29,17 @@ class _CreateTransferScreenState extends State<CreateTransferScreen> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
+      final timestamp = DateTime(
+        _date!.year,
+        _date!.month,
+        _date!.day,
+        _time!.hour,
+        _time!.minute,
+      );
+
       transferProvider.add(
         amount: _amount!,
-        timestamp: _timestamp!,
+        timestamp: timestamp,
         fromId: _fromId!,
         toId: _toId!,
       );
@@ -36,31 +48,31 @@ class _CreateTransferScreenState extends State<CreateTransferScreen> {
     }
   }
 
-  void _pickTimestamp() async {
+  void _pickDate() async {
     final now = DateTime.now();
     final DateTime? choosenDate = await showDatePicker(
       context: context,
-      initialDate: _timestamp ?? now,
+      initialDate: _date ?? now,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
 
     if (!mounted || choosenDate == null) return;
 
+    _date = choosenDate;
+    _dateController.text = _dateFormatter.format(choosenDate);
+  }
+
+  void _pickTime() async {
     final TimeOfDay? choosenTime = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(now),
+      initialTime: TimeOfDay.now(),
     );
 
     if (!mounted || choosenTime == null) return;
 
-    _timestampController.text = DateTime(
-      choosenDate.year,
-      choosenDate.month,
-      choosenDate.day,
-      choosenTime.hour,
-      choosenTime.minute,
-    ).toIso8601String();
+    _time = choosenTime;
+    _timeController.text = "${choosenTime.hour}:${choosenTime.minute}";
   }
 
   @override
@@ -104,7 +116,6 @@ class _CreateTransferScreenState extends State<CreateTransferScreen> {
                     children: [
                       TextFormField(
                         decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.money),
                           labelText: "Amount",
                           border: OutlineInputBorder(),
                         ),
@@ -119,27 +130,30 @@ class _CreateTransferScreenState extends State<CreateTransferScreen> {
                       ),
                       TextFormField(
                         readOnly: true,
-                        controller: _timestampController,
-                        onTap: () => _pickTimestamp(),
+                        controller: _dateController,
+                        onTap: () => _pickDate(),
                         decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.calendar_today),
-                          labelText: "Timestamp",
+                          labelText: "Date",
                           border: OutlineInputBorder(),
                         ),
-                        onSaved: (val) {
-                          if (_timestampController.text.isNotEmpty) {
-                            _timestamp = DateTime.parse(
-                              _timestampController.text,
-                            );
-                          }
-                        },
                         validator: (value) => value == null || value.isEmpty
-                            ? "Enter timestamp"
+                            ? "Select date"
+                            : null,
+                      ),
+                      TextFormField(
+                        readOnly: true,
+                        controller: _timeController,
+                        onTap: () => _pickTime(),
+                        decoration: InputDecoration(
+                          labelText: "Time",
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: (value) => value == null || value.isEmpty
+                            ? "Select time"
                             : null,
                       ),
                       DropdownButtonFormField(
                         decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.wallet),
                           labelText: "From",
                           border: OutlineInputBorder(),
                         ),
@@ -153,7 +167,6 @@ class _CreateTransferScreenState extends State<CreateTransferScreen> {
                       ),
                       DropdownButtonFormField(
                         decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.wallet),
                           labelText: "To",
                           border: OutlineInputBorder(),
                         ),

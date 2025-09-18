@@ -1,24 +1,19 @@
+import 'package:banda/entity/entry.dart';
 import 'package:banda/widgets/money_text.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class EntryTile extends StatelessWidget {
-  final DateTime timestamp;
-  final String category;
-  final String note;
-  final double amount;
+  final Entry entry;
   final dateFormatter = DateFormat("yyyy/MM/dd");
 
   EntryTile(
-    this.note, {
+    this.entry, {
     super.key,
-    required this.amount,
-    required this.category,
-    required this.timestamp,
   });
 
   String getDate() {
-    return dateFormatter.format(timestamp);
+    return dateFormatter.format(entry.timestamp);
   }
 
   @override
@@ -27,13 +22,13 @@ class EntryTile extends StatelessWidget {
 
     return ListTile(
       dense: true,
-      title: Text(category, style: theme.textTheme.titleSmall),
+      title: Text(entry.categoryName, style: theme.textTheme.titleSmall),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Text(
-            note,
+            entry.accountName,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodySmall,
           ),
@@ -44,7 +39,7 @@ class EntryTile extends StatelessWidget {
           ),
         ],
       ),
-      trailing: MoneyText(amount),
+      trailing: MoneyText(entry.amount),
     );
   }
 }

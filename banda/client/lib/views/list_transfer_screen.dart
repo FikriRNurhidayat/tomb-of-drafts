@@ -26,11 +26,14 @@ class _ListTransferScreenState extends State<ListTransferScreen> {
           }
 
           return SafeArea(
-            child: ListView.builder(
+            child: ListView.separated(
               itemCount: snapshot.data?.length ?? 0,
               itemBuilder: (BuildContext context, int index) {
                 final Transfer transfer = snapshot.data![index];
                 return TransferTile(transfer);
+              },
+              separatorBuilder: (context, index) {
+                return Divider();
               },
             ),
           );
