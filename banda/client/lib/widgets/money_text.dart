@@ -12,8 +12,8 @@ class MoneyText extends StatelessWidget {
     this.useSymbol = true,
   });
 
-  IconData getSign() {
-    return amount >= 0 ? Icons.add : Icons.remove;
+  String getSign() {
+    return amount >= 0 ? "+" : "-";
   }
 
   Color getColor(BuildContext context) {
@@ -50,45 +50,13 @@ class MoneyText extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: useSymbol
-              ? Icon(
-                  getSign(),
-                  size: theme.textTheme.bodySmall!.fontSize,
-                  color: getColor(context),
-                )
-              : null,
-        ),
-        SizedBox(
-          width: 48,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              getAmount(),
-              textAlign: TextAlign.center,
-              style: theme.textTheme.titleMedium!.apply(
-                color: getColor(context),
-                fontFamily: theme.textTheme.headlineSmall!.fontFamily,
-              ),
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            currency,
-            style: theme.textTheme.bodySmall!.apply(
-              color: getColor(context),
-              fontFamily: theme.textTheme.headlineSmall!.fontFamily,
-            ),
-          ),
-        ),
-      ],
+    return Text(
+      "${getSign()} ${getAmount()} $currency",
+      textAlign: TextAlign.center,
+      style: theme.textTheme.titleMedium!.apply(
+        color: getColor(context),
+        fontFamily: theme.textTheme.headlineSmall!.fontFamily,
+      ),
     );
   }
 }

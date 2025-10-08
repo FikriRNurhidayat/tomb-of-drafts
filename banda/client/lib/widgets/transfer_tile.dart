@@ -1,7 +1,8 @@
 import 'package:banda/entity/transfer.dart';
-import 'package:banda/widgets/money_text.dart';
+import 'package:banda/providers/transfer_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class TransferTile extends StatelessWidget {
   final Transfer transfer;
@@ -36,79 +37,112 @@ class TransferTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
-      padding: EdgeInsets.all(16),
-      child: Row(
-        spacing: 16,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('From', style: theme.textTheme.titleSmall),
-                Text(
-                  transfer.fromAccountName,
-                  style: theme.textTheme.titleMedium!.apply(
-                    fontFamily: theme.textTheme.headlineSmall!.fontFamily,
-                    color: theme.colorScheme.error,
-                  ),
+    return GestureDetector(
+      onLongPress: () {
+        showDialog(
+          context: context,
+          builder: (ctx) {
+            return AlertDialog(
+              title: const Text("Please Confirm"),
+              content: const Text(
+                "Are you sure you want to remove this transfer entry?",
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    final transferProvider = context.read<TransferProvider>();
+
+                    transferProvider.remove(transfer.id);
+
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Yes'),
                 ),
-                Text(
-                  transfer.fromAccountHolderName,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.labelSmall,
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('No'),
                 ),
               ],
-            ),
-          ),
-
-          Column(children: [Icon(Icons.chevron_right)]),
-
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  getAmount(transfer.amount),
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.titleMedium!.apply(
-                    fontFamily: theme.textTheme.headlineSmall!.fontFamily,
+            );
+          },
+        );
+      },
+      child: Container(
+        padding: EdgeInsets.all(16),
+        child: Row(
+          spacing: 16,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('From', style: theme.textTheme.titleSmall),
+                  Text(
+                    transfer.fromAccountName,
+                    style: theme.textTheme.titleMedium!.apply(
+                      fontFamily: theme.textTheme.headlineSmall!.fontFamily,
+                      color: theme.colorScheme.error,
+                    ),
                   ),
-                ),
-                Text(
-                  dateFormat.format(transfer.timestamp),
-                  style: theme.textTheme.labelSmall,
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-
-          Column(children: [Icon(Icons.chevron_right)]),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('To', style: theme.textTheme.titleSmall),
-                Text(
-                  transfer.toAccountName,
-                  style: theme.textTheme.titleMedium!.apply(
-                    fontFamily: theme.textTheme.headlineSmall!.fontFamily,
-                    color: theme.colorScheme.primary,
+                  Text(
+                    transfer.fromAccountHolderName,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelSmall,
                   ),
-                ),
-                Text(
-                  transfer.toAccountHolderName,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.labelSmall,
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+
+            Column(children: [Icon(Icons.chevron_right)]),
+
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    getAmount(transfer.amount),
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.titleMedium!.apply(
+                      fontFamily: theme.textTheme.headlineSmall!.fontFamily,
+                    ),
+                  ),
+                  Text(
+                    dateFormat.format(transfer.timestamp),
+                    style: theme.textTheme.labelSmall,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+
+            Column(children: [Icon(Icons.chevron_right)]),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('To', style: theme.textTheme.titleSmall),
+                  Text(
+                    transfer.toAccountName,
+                    style: theme.textTheme.titleMedium!.apply(
+                      fontFamily: theme.textTheme.headlineSmall!.fontFamily,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                  Text(
+                    transfer.toAccountHolderName,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelSmall,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -12,7 +12,7 @@ class AccountRepository extends Repository {
   Future<Account> create({
     required String name,
     required String holderName,
-    required String kind,
+    required AccountKind kind,
   }) async {
     final id = Repository.getId();
     final now = DateTime.now();
@@ -21,7 +21,7 @@ class AccountRepository extends Repository {
       "id": id,
       "name": name,
       "holder_name": holderName,
-      "kind": kind,
+      "kind": kind.label,
       "created_at": now.toIso8601String(),
       "updated_at": now.toIso8601String(),
     });
@@ -30,7 +30,7 @@ class AccountRepository extends Repository {
       id: id,
       name: name,
       holderName: holderName,
-      kind: AccountKind.values.firstWhere((e) => e.label == kind),
+      kind: kind,
       createdAt: now,
       updatedAt: now,
     );
@@ -40,7 +40,7 @@ class AccountRepository extends Repository {
     required String id,
     required String name,
     required String holderName,
-    required String kind,
+    required AccountKind kind,
   }) async {
     final now = DateTime.now();
 
@@ -48,8 +48,8 @@ class AccountRepository extends Repository {
       "accounts",
       {
         "name": name,
-        "holderName": holderName,
-        "kind": AccountKind.values.firstWhere((e) => e.label == kind),
+        "holder_name": holderName,
+        "kind": kind.label,
         "updated_at": now.toIso8601String(),
       },
       where: "id = ?",

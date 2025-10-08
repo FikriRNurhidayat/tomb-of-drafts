@@ -1,3 +1,4 @@
+import 'package:banda/decorations/input_styles.dart';
 import 'package:banda/entity/account.dart';
 import 'package:banda/entity/category.dart';
 import 'package:banda/entity/entry.dart';
@@ -32,7 +33,7 @@ class _EditEntryScreenState extends State<EditEntryScreen> {
   DateTime? _date;
   TimeOfDay? _time;
 
-  formatTime(TimeOfDay time) {
+  _formatTime(TimeOfDay time) {
     final hour = time.hour.toString().padLeft(2, '0');
     final minute = time.minute.toString().padLeft(2, '0');
     return "$hour:$minute";
@@ -58,7 +59,7 @@ class _EditEntryScreenState extends State<EditEntryScreen> {
       _time = TimeOfDay.fromDateTime(entry.timestamp);
 
       _dateController.text = _dateFormatter.format(_date!);
-      _timeController.text = formatTime(_time!);
+      _timeController.text = _formatTime(_time!);
     }
   }
 
@@ -127,7 +128,7 @@ class _EditEntryScreenState extends State<EditEntryScreen> {
     if (!mounted || choosenTime == null) return;
 
     _time = choosenTime;
-    _timeController.text = formatTime(choosenTime);
+    _timeController.text = _formatTime(choosenTime);
   }
 
   @override
@@ -154,6 +155,12 @@ class _EditEntryScreenState extends State<EditEntryScreen> {
           "Enter entry details",
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: IconButton(onPressed: _submit, icon: Icon(Icons.check)),
+          ),
+        ],
       ),
       body: FutureBuilder(
         future: Future.wait([
@@ -161,168 +168,158 @@ class _EditEntryScreenState extends State<EditEntryScreen> {
           accountProvider.search(),
         ]),
         builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Text("Error");
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (!snapshot.hasData) {
-            return Text("No data");
+            return const Center(child: CircularProgressIndicator());
           }
 
           final categories = snapshot.data![0] as List<Category>;
           final accounts = snapshot.data![1] as List<Account>;
 
-          return Stack(
-            children: [
-              SingleChildScrollView(
-                padding: EdgeInsets.all(8),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    spacing: 16,
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                spacing: 16,
+                children: [
+                  TextFormField(
+                    decoration: InputStyles.field(
+                      labelText: "Note",
+                      hintText: "Enter note...",
+                    ),
+                    initialValue: _note,
+                    onSaved: (value) => _note = value ?? '',
+                    validator: (value) =>
+                        value == null || value.isEmpty ? "Enter note" : null,
+                  ),
+                  TextFormField(
+                    decoration: InputStyles.field(
+                      labelText: "Amount",
+                      hintText: "Enter amount...",
+                    ),
+                    initialValue: _amount?.toString(),
+                    keyboardType: TextInputType.numberWithOptions(
+                      signed: true,
+                      decimal: true,
+                    ),
+                    onSaved: (value) => _amount = double.tryParse(value!),
+                    validator: (value) =>
+                        value == null || value.isEmpty ? "Enter amount" : null,
+                  ),
+                  Row(
                     children: [
-                      TextFormField(
-                        decoration: InputDecoration(
-                          labelText: "Note",
-                          border: OutlineInputBorder(),
+                      Expanded(
+                        child: TextFormField(
+                          readOnly: true,
+                          controller: _dateController,
+                          onTap: () => _pickDate(),
+                          decoration: InputStyles.field(
+                            labelText: "Date",
+                            hintText: "Select date...",
+                          ),
+                          validator: (value) => value == null || value.isEmpty
+                              ? "Select date"
+                              : null,
                         ),
-                        initialValue: _note,
-                        onSaved: (value) => _note = value ?? '',
-                        validator: (value) => value == null || value.isEmpty
-                            ? "Enter note"
-                            : null,
                       ),
-                      TextFormField(
-                        decoration: InputDecoration(
-                          labelText: "Amount",
-                          border: OutlineInputBorder(),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: TextFormField(
+                          readOnly: true,
+                          controller: _timeController,
+                          onTap: () => _pickTime(),
+                          decoration: InputStyles.field(
+                            labelText: "Time",
+                            hintText: "Select time...",
+                          ),
+                          validator: (value) => value == null || value.isEmpty
+                              ? "Select time"
+                              : null,
                         ),
-                        initialValue: _amount?.toString(),
-                        keyboardType: TextInputType.numberWithOptions(
-                          signed: true,
-                          decimal: true,
-                        ),
-                        onSaved: (value) => _amount = double.tryParse(value!),
-                        validator: (value) => value == null || value.isEmpty
-                            ? "Enter amount"
-                            : null,
-                      ),
-                      TextFormField(
-                        readOnly: true,
-                        controller: _dateController,
-                        onTap: () => _pickDate(),
-                        decoration: InputDecoration(
-                          labelText: "Date",
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) => value == null || value.isEmpty
-                            ? "Select date"
-                            : null,
-                      ),
-                      TextFormField(
-                        readOnly: true,
-                        controller: _timeController,
-                        onTap: () => _pickTime(),
-                        decoration: InputDecoration(
-                          labelText: "Time",
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) => value == null || value.isEmpty
-                            ? "Select time"
-                            : null,
-                      ),
-                      DropdownButtonFormField(
-                        decoration: InputDecoration(
-                          labelText: "Status",
-                          border: OutlineInputBorder(),
-                        ),
-                        initialValue: _status,
-                        items: EntryStatus.values.map((c) {
-                          return DropdownMenuItem(
-                            value: c,
-                            child: Text(
-                              c.label,
-                              style: TextStyle(
-                                fontFamily:
-                                    theme.textTheme.headlineSmall!.fontFamily,
-                                fontWeight:
-                                    theme.textTheme.bodySmall!.fontWeight,
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (value) => _status = value,
-                      ),
-                      DropdownButtonFormField(
-                        decoration: InputDecoration(
-                          labelText: "Category",
-                          border: OutlineInputBorder(),
-                        ),
-                        initialValue: _categoryId,
-                        items: categories.map((c) {
-                          return DropdownMenuItem(
-                            value: c.id,
-                            child: Text(
-                              c.name,
-                              style: TextStyle(
-                                fontFamily:
-                                    theme.textTheme.headlineSmall!.fontFamily,
-                                fontWeight:
-                                    theme.textTheme.bodySmall!.fontWeight,
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (value) => _categoryId = value ?? '',
-                      ),
-                      DropdownButtonFormField(
-                        decoration: InputDecoration(
-                          labelText: "Account",
-                          border: OutlineInputBorder(),
-                        ),
-                        initialValue: _accountId,
-                        items: accounts.map((i) {
-                          return DropdownMenuItem(
-                            value: i.id,
-                            child: Text(
-                              "${i.holderName}: ${i.name}",
-                              style: TextStyle(
-                                fontFamily:
-                                    theme.textTheme.headlineSmall!.fontFamily,
-                                fontWeight:
-                                    theme.textTheme.bodySmall!.fontWeight,
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (value) => _accountId = value ?? '',
                       ),
                     ],
                   ),
-                ),
-              ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: SafeArea(
-                  top: false,
-                  child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: theme.colorScheme.primary,
-                          foregroundColor: theme.colorScheme.onPrimary,
-                          padding: EdgeInsets.symmetric(vertical: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField(
+                          decoration: InputStyles.field(
+                            labelText: "Status",
+                            hintText: "Select status...",
+                          ),
+                          initialValue: _status,
+                          items: EntryStatus.values.map((c) {
+                            return DropdownMenuItem(
+                              value: c,
+                              child: Text(
+                                c.label,
+                                style: TextStyle(
+                                  fontFamily:
+                                      theme.textTheme.headlineSmall!.fontFamily,
+                                  fontWeight:
+                                      theme.textTheme.bodySmall!.fontWeight,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (value) => _status = value,
                         ),
-                        onPressed: _submit,
-                        child: const Text("Add"),
                       ),
-                    ),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: DropdownButtonFormField(
+                          decoration: InputStyles.field(
+                            labelText: "Category",
+                            hintText: "Select category...",
+                          ),
+                          initialValue: _categoryId,
+                          items: categories.map((c) {
+                            return DropdownMenuItem(
+                              value: c.id,
+                              child: Text(
+                                c.name,
+                                style: TextStyle(
+                                  fontFamily:
+                                      theme.textTheme.headlineSmall!.fontFamily,
+                                  fontWeight:
+                                      theme.textTheme.bodySmall!.fontWeight,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (value) => _categoryId = value ?? '',
+                        ),
+                      ),
+                    ],
                   ),
-                ),
+                  DropdownButtonFormField(
+                    decoration: InputStyles.field(
+                      labelText: "Account",
+                      hintText: "Select account...",
+                    ),
+                    initialValue: _accountId,
+                    items: accounts.map((i) {
+                      return DropdownMenuItem(
+                        value: i.id,
+                        child: Text(
+                          "${i.holderName}: ${i.name}",
+                          style: TextStyle(
+                            fontFamily:
+                                theme.textTheme.headlineSmall!.fontFamily,
+                            fontWeight: theme.textTheme.bodySmall!.fontWeight,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (value) => _accountId = value ?? '',
+                  ),
+                ],
               ),
-            ],
+            ),
           );
         },
       ),

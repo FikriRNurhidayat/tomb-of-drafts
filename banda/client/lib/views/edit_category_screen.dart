@@ -117,7 +117,14 @@ class _EditCategoryScreenState extends State<EditCategoryScreen> {
       body: FutureBuilder<List<Category>>(
         future: categoryProvider.search(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) return const CircularProgressIndicator();
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
           final categories = snapshot.data!;
           return ListView(
             children: [

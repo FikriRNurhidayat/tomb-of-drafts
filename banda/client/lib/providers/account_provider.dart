@@ -14,7 +14,7 @@ class AccountProvider extends ChangeNotifier {
   Future<void> add({
     required String name,
     required String holderName,
-    required String kind,
+    required AccountKind kind,
   }) async {
     await _repository.create(name: name, holderName: holderName, kind: kind);
     notifyListeners();
@@ -24,7 +24,7 @@ class AccountProvider extends ChangeNotifier {
     required String id,
     required String name,
     required String holderName,
-    required String kind,
+    required AccountKind kind,
   }) async {
     await _repository.update(
       id: id,

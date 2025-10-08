@@ -119,7 +119,14 @@ class _EditLabelScreenState extends State<EditLabelScreen> {
       body: FutureBuilder<List<Label>>(
         future: labelProvider.search(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) return const CircularProgressIndicator();
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
           final labels = snapshot.data!;
           return ListView(
             children: [
