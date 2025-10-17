@@ -11,6 +11,7 @@ class EditLabelScreen extends StatelessWidget {
     return EditItem<Label, LabelProvider>(
       title: "Edit labels",
       deletePromptText: "Are you sure you want to delete this label?",
+      deletePromptTitle: "Delete label",
       hintText: "Create new label",
     );
   }

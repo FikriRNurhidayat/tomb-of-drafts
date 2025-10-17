@@ -27,11 +27,17 @@ class EntryTile extends StatelessWidget {
           context: context,
           builder: (ctx) {
             return AlertDialog(
-              title: const Text("Please Confirm"),
+              title: const Text("Delete entry"),
               content: const Text(
                 "Are you sure you want to remove this entry?",
               ),
               actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('No'),
+                ),
                 TextButton(
                   onPressed: () {
                     final entryProvider = context.read<EntryProvider>();
@@ -41,12 +47,6 @@ class EntryTile extends StatelessWidget {
                     Navigator.of(context).pop();
                   },
                   child: const Text('Yes'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('No'),
                 ),
               ],
             );

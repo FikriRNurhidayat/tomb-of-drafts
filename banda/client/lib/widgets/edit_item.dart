@@ -7,12 +7,14 @@ class EditItem<I extends Itemable, P extends ItemableProvider<I>>
     extends StatefulWidget {
   final String title;
   final String deletePromptText;
+  final String deletePromptTitle;
   final String hintText;
 
   const EditItem({
     super.key,
     required this.title,
     required this.deletePromptText,
+    required this.deletePromptTitle,
     required this.hintText,
   });
 
@@ -78,9 +80,15 @@ class _EditItemState<I extends Itemable, P extends ItemableProvider<I>>
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text("Please Confirm"),
+          title: Text(widget.deletePromptTitle),
           content: Text(widget.deletePromptText),
           actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("No"),
+            ),
             TextButton(
               onPressed: () {
                 context.read<P>().remove(item.id);
@@ -89,12 +97,6 @@ class _EditItemState<I extends Itemable, P extends ItemableProvider<I>>
                 Navigator.of(context).pop();
               },
               child: const Text("Yes"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text("No"),
             ),
           ],
         );

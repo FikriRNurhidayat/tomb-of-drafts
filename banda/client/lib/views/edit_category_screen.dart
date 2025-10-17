@@ -11,6 +11,7 @@ class EditCategoryScreen extends StatelessWidget {
     return EditItem<Category, CategoryProvider>(
       title: "Edit categories",
       deletePromptText: "Are you sure you want to delete this category?",
+      deletePromptTitle: "Delete category",
       hintText: "Create new category",
     );
   }

@@ -277,20 +277,25 @@ class _EditEntryScreenState extends State<EditEntryScreen> {
                             hintText: "Select category...",
                           ),
                           initialValue: _categoryId,
-                          items: categories.map((c) {
-                            return DropdownMenuItem(
-                              value: c.id,
-                              child: Text(
-                                c.name,
-                                style: TextStyle(
-                                  fontFamily:
-                                      theme.textTheme.headlineSmall!.fontFamily,
-                                  fontWeight:
-                                      theme.textTheme.bodySmall!.fontWeight,
-                                ),
-                              ),
-                            );
-                          }).toList(),
+                          items: categories
+                              .where((category) => category.deletable)
+                              .map((c) {
+                                return DropdownMenuItem(
+                                  value: c.id,
+                                  child: Text(
+                                    c.name,
+                                    style: TextStyle(
+                                      fontFamily: theme
+                                          .textTheme
+                                          .headlineSmall!
+                                          .fontFamily,
+                                      fontWeight:
+                                          theme.textTheme.bodySmall!.fontWeight,
+                                    ),
+                                  ),
+                                );
+                              })
+                              .toList(),
                           onChanged: (value) => _categoryId = value ?? '',
                         ),
                       ),

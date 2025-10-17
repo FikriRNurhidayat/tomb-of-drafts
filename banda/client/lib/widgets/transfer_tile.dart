@@ -43,11 +43,17 @@ class TransferTile extends StatelessWidget {
           context: context,
           builder: (ctx) {
             return AlertDialog(
-              title: const Text("Please Confirm"),
+              title: const Text("Delete transfer"),
               content: const Text(
                 "Are you sure you want to remove this transfer entry?",
               ),
               actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('No'),
+                ),
                 TextButton(
                   onPressed: () {
                     final transferProvider = context.read<TransferProvider>();
@@ -57,12 +63,6 @@ class TransferTile extends StatelessWidget {
                     Navigator.of(context).pop();
                   },
                   child: const Text('Yes'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('No'),
                 ),
               ],
             );
