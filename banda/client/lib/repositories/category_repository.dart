@@ -75,9 +75,8 @@ class CategoryRepository extends Repository {
   }
 
   Future<void> delete(String id) async {
-    await db.update(
+    await db.delete(
       "categories",
-      {"deleted_at": DateTime.now().toIso8601String()},
       where: "id = ? AND deletable = TRUE",
       whereArgs: [id],
     );

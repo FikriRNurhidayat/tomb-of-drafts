@@ -1,8 +1,14 @@
-class Label {
+import 'package:banda/entity/itemable.dart';
+
+class Label extends Itemable {
+  @override
   final String id;
+  @override
   final String name;
   final DateTime createdAt;
   final DateTime updatedAt;
+  @override
+  final bool deletable = true;
 
   Label({
     required this.id,

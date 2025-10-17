@@ -1,5 +1,9 @@
-class Category {
+import 'package:banda/entity/itemable.dart';
+
+class Category extends Itemable {
+  @override
   final String id;
+  @override
   final String name;
   final bool deletable;
   final DateTime createdAt;
