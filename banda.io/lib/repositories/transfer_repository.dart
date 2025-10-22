@@ -1,6 +1,7 @@
 import 'package:banda/entity/entry.dart';
 import 'package:banda/entity/transfer.dart';
 import 'package:banda/repositories/repository.dart';
+import 'package:sqlite3/sqlite3.dart';
 import 'package:uuid/uuid.dart';
 
 class TransferRepository extends Repository {
@@ -11,7 +12,7 @@ class TransferRepository extends Repository {
     return TransferRepository._(db);
   }
 
-  Future<Transfer> create({
+  Future<Transfer?> create({
     required double amount,
     required DateTime timestamp,
     required String fromId,
@@ -64,32 +65,58 @@ class TransferRepository extends Repository {
       "updated_at": now.toIso8601String(),
     };
 
-    await db.transaction((txn) async {
-      final batch = txn.batch();
+    db.execute("BEGIN TRANSACTION");
+    try {
+      db.execute(
+        "INSERT INTO entries (id, note, amount, status, timestamp, category_id, account_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          fromEntry["id"],
+          fromEntry["note"],
+          fromEntry["amount"],
+          fromEntry["status"],
+          fromEntry["timestamp"],
+          fromEntry["category_id"],
+          fromEntry["account_id"],
+          fromEntry["created_at"],
+          fromEntry["updated_at"],
+        ],
+      );
 
-      batch.insert("entries", fromEntry);
-      batch.insert("entries", toEntry);
+      db.execute(
+        "INSERT INTO entries (id, note, amount, status, timestamp, category_id, account_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          toEntry["id"],
+          toEntry["note"],
+          toEntry["amount"],
+          toEntry["status"],
+          toEntry["timestamp"],
+          toEntry["category_id"],
+          toEntry["account_id"],
+          toEntry["created_at"],
+          toEntry["updated_at"],
+        ],
+      );
 
-      batch.insert("transfers", {
-        "id": id,
-        "note": note,
-        "amount": amount,
-        "timestamp": timestamp.toIso8601String(),
-        "from_entry_id": fromEntry["id"],
-        "to_entry_id": toEntry["id"],
-        "created_at": now.toIso8601String(),
-        "updated_at": now.toIso8601String(),
-      });
+      db.execute(
+        "INSERT INTO transfers (id, note, amount, timestamp, from_entry_id, to_entry_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          id,
+          note,
+          amount,
+          timestamp.toIso8601String(),
+          fromEntry["id"],
+          toEntry["id"],
+          now.toIso8601String(),
+          now.toIso8601String(),
+        ],
+      );
 
-      await batch.commit(noResult: true);
-    });
-
-    final transfer = await get(id);
-    if (transfer == null) {
-      throw UnimplementedError();
+      db.execute('COMMIT');
+    } catch (e) {
+      db.execute('ROLLBACK');
     }
 
-    return transfer;
+    return get(id);
   }
 
   Future<Transfer?> update({
@@ -99,26 +126,16 @@ class TransferRepository extends Repository {
   }) async {
     final now = DateTime.now();
 
-    final updated = await db.update(
-      "transfers",
-      {
-        "amount": amount,
-        "timestamp": timestamp.toString(),
-        "updated_at": now.toIso8601String(),
-      },
-      where: "id = ?",
-      whereArgs: [id],
+    db.execute(
+      "UPDATE transfers SET amount = ?, timestamp = ?, updated_at = ? WHERE id = ?",
+      [amount, timestamp.toString(), now.toIso8601String(), id],
     );
-
-    if (updated == 0) {
-      return null;
-    }
 
     return get(id);
   }
 
   Future<Transfer?> get(String id) async {
-    final List<Map> rows = await db.rawQuery(
+    final ResultSet rows = db.select(
       """
       SELECT
         transfers.id,
@@ -151,7 +168,7 @@ class TransferRepository extends Repository {
   }
 
   Future<List<Transfer>> search() async {
-    final List<Map> rows = await db.rawQuery("""
+    final ResultSet rows = db.select("""
         SELECT
           transfers.id,
           transfers.note,
@@ -170,34 +187,42 @@ class TransferRepository extends Repository {
         INNER JOIN accounts AS from_accounts ON from_accounts.id = from_entries.account_id 
         INNER JOIN entries AS to_entries ON to_entries.id = transfers.to_entry_id 
         INNER JOIN accounts AS to_accounts ON to_accounts.id = to_entries.account_id 
+        ORDER BY transfers.timestamp DESC
         """);
 
     return rows.map((row) => Transfer.fromRow(row)).toList();
   }
 
   Future<void> delete(String id) async {
-    await db.transaction((txn) async {
-      final rows = await txn.query(
-        "transfers",
-        where: "id = ?",
-        whereArgs: [id],
-      );
-      if (rows.isEmpty) return;
+    db.execute("BEGIN TRANSACTION");
+    try {
+      final ResultSet rows = db.select("SELECT * FROM transfers WHERE id = ?", [
+        id,
+      ]);
+
+      if (rows.isEmpty) {
+        db.execute("COMMIT");
+        return;
+      }
 
       final row = rows.first;
-      final batch = txn.batch();
-      batch.delete("transfers", where: "id = ?", whereArgs: [id]);
-      batch.delete("entries", where: "id IN (?, ?)", whereArgs: [row["from_entry_id"], row["to_entry_id"]]);
 
-      await batch.commit(noResult: true);
-    });
+      db.execute("DELETE FROM transfers WHERE id = ?", [id]);
+      db.execute("DELETE FROM entries WHERE id IN (?, ?)", [
+        row["from_entry_id"],
+        row["to_entry_id"],
+      ]);
+
+      db.execute("COMMIT");
+    } catch (e) {
+      db.execute("ROLLBACK");
+    }
   }
 
   Future<Map?> _getCategoryByName(String name) async {
-    final List<Map> rows = await db.query(
-      "categories",
-      where: "name = ?",
-      whereArgs: [name],
+    final ResultSet rows = db.select(
+      "SELECT * FROM categories FROM where name = ?",
+      [name],
     );
 
     if (rows.isEmpty) {
@@ -208,11 +233,9 @@ class TransferRepository extends Repository {
   }
 
   Future<Map?> _getAccount(String id) async {
-    final List<Map> rows = await db.query(
-      "accounts",
-      where: "id = ?",
-      whereArgs: [id],
-    );
+    final ResultSet rows = db.select("SELECT * FROM accounts WHERE id = ?", [
+      id,
+    ]);
 
     if (rows.isEmpty) {
       return null;

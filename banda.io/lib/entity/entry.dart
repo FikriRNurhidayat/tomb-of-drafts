@@ -1,6 +1,7 @@
 enum EntryStatus {
   pending('Pending'),
-  done('Done');
+  done('Done'),
+  unknown('Unknown');
 
   final String label;
   const EntryStatus(this.label);
@@ -40,7 +41,7 @@ class Entry {
       id: row["id"],
       note: row["note"],
       amount: row["amount"],
-      status: EntryStatus.values.firstWhere((e) => e.label == row["status"]),
+      status: EntryStatus.values.firstWhere((e) => e.label == row["status"], orElse: () => EntryStatus.unknown),
       timestamp: DateTime.parse(row["timestamp"]),
       accountId: row["account_id"],
       accountName: row["account_name"],

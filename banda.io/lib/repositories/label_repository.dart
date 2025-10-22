@@ -1,5 +1,6 @@
 import 'package:banda/entity/label.dart';
 import "package:banda/repositories/repository.dart";
+import 'package:sqlite3/sqlite3.dart';
 
 class LabelRepository extends Repository {
   LabelRepository._(super.db);
@@ -13,12 +14,9 @@ class LabelRepository extends Repository {
     final id = Repository.getId();
     final now = DateTime.now();
 
-    await db.insert("labels", {
-      "id": id,
-      "name": name,
-      "created_at": now.toIso8601String(),
-      "updated_at": now.toIso8601String(),
-    });
+    db.execute(
+      "INSERT INTO labels (id, name, created_at, updated) VALUES (?, ?, ?, ?)",
+    );
 
     return Label(id: id, name: name, createdAt: now, updatedAt: now);
   }
@@ -26,31 +24,17 @@ class LabelRepository extends Repository {
   Future<Label?> update({required String id, required String name}) async {
     final now = DateTime.now();
 
-    await db.update(
-      "labels",
-      {"name": name, "updated_at": now.toIso8601String()},
-      where: "id = ?",
-      whereArgs: [id],
-    );
+    db.execute("UPDATE labels SET name = ?, updated_at = ? WHERE id = ?", [
+      name,
+      now.toIso8601String(),
+      id,
+    ]);
 
-    final List<Map> rows = await db.query(
-      "labels",
-      where: "id = ?",
-      whereArgs: [id],
-    );
-    if (rows.isEmpty) {
-      return null;
-    }
-
-    return Label.fromRow(rows.first);
+    return get(id);
   }
 
   Future<Label?> get(String id) async {
-    final List<Map> rows = await db.query(
-      "labels",
-      where: "id = ?",
-      whereArgs: [id],
-    );
+    final List<Map> rows = db.select("SELECT * FROM labels WHERE id = ?", [id]);
     if (rows.isEmpty) {
       return null;
     }
@@ -59,11 +43,11 @@ class LabelRepository extends Repository {
   }
 
   Future<List<Label>> search() async {
-    final List<Map> rows = await db.query("labels");
+    final ResultSet rows = db.select("SELECT * FROM labels");
     return rows.map((row) => Label.fromRow(row)).toList();
   }
 
   Future<void> delete(String id) async {
-    await db.delete("labels", where: "id = ?", whereArgs: [id]);
+    db.execute("DELETE FROM labels WHERE id = ?", [id]);
   }
 }

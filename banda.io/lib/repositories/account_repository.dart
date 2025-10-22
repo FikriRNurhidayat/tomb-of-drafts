@@ -1,5 +1,6 @@
 import "package:banda/entity/account.dart";
 import "package:banda/repositories/repository.dart";
+import "package:sqlite3/sqlite3.dart";
 
 class AccountRepository extends Repository {
   AccountRepository._(super.db);
@@ -17,14 +18,17 @@ class AccountRepository extends Repository {
     final id = Repository.getId();
     final now = DateTime.now();
 
-    await db.insert("accounts", {
-      "id": id,
-      "name": name,
-      "holder_name": holderName,
-      "kind": kind.label,
-      "created_at": now.toIso8601String(),
-      "updated_at": now.toIso8601String(),
-    });
+    db.execute(
+      "INSERT INTO accounts (id, name, holder_name, kind, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
+      [
+        id,
+        name,
+        holderName,
+        kind.label,
+        now.toIso8601String(),
+        now.toIso8601String(),
+      ],
+    );
 
     return Account(
       id: id,
@@ -44,49 +48,32 @@ class AccountRepository extends Repository {
   }) async {
     final now = DateTime.now();
 
-    await db.update(
-      "accounts",
-      {
-        "name": name,
-        "holder_name": holderName,
-        "kind": kind.label,
-        "updated_at": now.toIso8601String(),
-      },
-      where: "id = ?",
-      whereArgs: [id],
+    db.execute(
+      "UPDATE accounts SET name = ?, holder_name = ?, kind = ?, updated_at = ? WHERE id = ?",
+      [name, holderName, kind.label, now.toIso8601String(), id],
     );
 
-    final List<Map> rows = await db.query(
-      "accounts",
-      where: "id = ?",
-      whereArgs: [id],
-    );
-    if (rows.isEmpty) {
-      return null;
-    }
-
-    return Account.fromRow(rows.first);
+    return get(id);
   }
 
   Future<Account?> get(String id) async {
-    final List<Map> rows = await db.query(
-      "accounts",
-      where: "id = ?",
-      whereArgs: [id],
-    );
-    if (rows.isEmpty) {
+    final ResultSet result = db.select("SELECT * FROM accounts WHERE id = ?", [
+      id,
+    ]);
+
+    if (result.isEmpty) {
       return null;
     }
 
-    return Account.fromRow(rows.first);
+    return Account.fromRow(result.first);
   }
 
   Future<List<Account>> search() async {
-    final List<Map> rows = await db.query("accounts");
+    final ResultSet rows = db.select("SELECT * FROM accounts");
     return rows.map((row) => Account.fromRow(row)).toList();
   }
 
   Future<void> delete(String id) async {
-    await db.delete("accounts", where: "id = ?", whereArgs: [id]);
+    db.execute("DELETE FROM accounts WHERE id = ?", [id]);
   }
 }

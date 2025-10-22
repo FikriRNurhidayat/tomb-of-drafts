@@ -1,5 +1,6 @@
 import 'package:banda/entity/entry.dart';
 import 'package:banda/repositories/repository.dart';
+import 'package:sqlite3/sqlite3.dart';
 
 class EntryRepository extends Repository {
   EntryRepository._(super.db);
@@ -30,17 +31,20 @@ class EntryRepository extends Repository {
       throw UnimplementedError();
     }
 
-    await db.insert("entries", {
-      "id": id,
-      "note": note,
-      "amount": amount,
-      "timestamp": timestamp.toIso8601String(),
-      "status": status.label,
-      "category_id": category["id"],
-      "account_id": account["id"],
-      "created_at": now.toIso8601String(),
-      "updated_at": now.toIso8601String(),
-    });
+    db.execute(
+      "INSERT INTO entries (id, note, amount, timestamp, status, category_id, account_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [
+        id,
+        note,
+        amount,
+        timestamp.toIso8601String(),
+        status.label,
+        category["id"],
+        account["id"],
+        now.toIso8601String(),
+        now.toIso8601String(),
+      ],
+    );
 
     return Entry(
       id: id,
@@ -69,30 +73,25 @@ class EntryRepository extends Repository {
   }) async {
     final now = DateTime.now();
 
-    final updated = await db.update(
-      "entries",
-      {
-        "note": note,
-        "amount": amount,
-        "status": status.label,
-        "timestamp": timestamp.toString(),
-        "category_id": categoryId,
-        "account_id": accountId,
-        "updated_at": now.toIso8601String(),
-      },
-      where: "id = ?",
-      whereArgs: [id],
+    db.execute(
+      "UPDATE entries SET note = ?, amount = ?, status = ?, timestamp = ?, category_id = ?, account_id = ?, updated_at = ? WHERE id = ?",
+      [
+        note,
+        amount,
+        status.label,
+        timestamp.toIso8601String(),
+        categoryId,
+        accountId,
+        now.toIso8601String(),
+        id,
+      ],
     );
-
-    if (updated == 0) {
-      return null;
-    }
 
     return get(id);
   }
 
   Future<Entry?> get(String id) async {
-    final List<Map> rows = await db.rawQuery(
+    final ResultSet rows = db.select(
       """
       SELECT
         entries.id,
@@ -123,38 +122,37 @@ class EntryRepository extends Repository {
   }
 
   Future<List<Entry>> search() async {
-    final List<Map> rows = await db.rawQuery("""
-        SELECT
-          entries.id,
-          entries.note,
-          entries.amount,
-          entries.timestamp,
-          entries.status,
-          entries.category_id,
-          categories.name AS category_name,
-          entries.account_id,
-          accounts.name AS account_name,
-          accounts.holder_name AS account_holder_name,
-          entries.created_at,
-          entries.updated_at
-        FROM entries
-        INNER JOIN categories ON categories.id = entries.category_id 
-        INNER JOIN accounts ON accounts.id = entries.account_id 
-        """);
+    final ResultSet rows = db.select("""
+          SELECT
+            entries.id,
+            entries.note,
+            entries.amount,
+            entries.timestamp,
+            entries.status,
+            entries.category_id,
+            categories.name AS category_name,
+            entries.account_id,
+            accounts.name AS account_name,
+            accounts.holder_name AS account_holder_name,
+            entries.created_at,
+            entries.updated_at
+          FROM entries
+          INNER JOIN categories ON categories.id = entries.category_id 
+          INNER JOIN accounts ON accounts.id = entries.account_id 
+          ORDER BY entries.timestamp DESC
+          """);
 
     return rows.map((row) => Entry.fromRow(row)).toList();
   }
 
   Future<void> delete(String id) async {
-    await db.delete("entries", where: "id = ?", whereArgs: [id]);
+    db.execute("DELETE FROM entries WHERE id = ?", [id]);
   }
 
   Future<Map?> _getCategory(String id) async {
-    final List<Map> rows = await db.query(
-      "categories",
-      where: "id = ?",
-      whereArgs: [id],
-    );
+    final ResultSet rows = db.select("SELECT * FROM categories WHERE id = ?", [
+      id,
+    ]);
 
     if (rows.isEmpty) {
       return null;
@@ -164,11 +162,9 @@ class EntryRepository extends Repository {
   }
 
   Future<Map?> _getAccount(String id) async {
-    final List<Map> rows = await db.query(
-      "accounts",
-      where: "id = ?",
-      whereArgs: [id],
-    );
+    final ResultSet rows = db.select("SELECT * FROM accounts WHERE id = ?", [
+      id,
+    ]);
 
     if (rows.isEmpty) {
       return null;

@@ -6,6 +6,7 @@ import 'package:banda/views/edit_transfer_screen.dart';
 import 'package:banda/views/list_account_screen.dart';
 import 'package:banda/views/list_entry_screen.dart';
 import 'package:banda/views/list_transfer_screen.dart';
+import 'package:banda/views/setting_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 
@@ -149,7 +150,7 @@ class _MainScreenState extends State<MainScreen> {
     Screen(
       title: "Settings",
       icon: Icons.settings,
-      child: Center(child: Text("Settings")),
+      child: SettingScreen(),
     ),
   ];
 

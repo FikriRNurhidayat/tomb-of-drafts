@@ -1,11 +1,11 @@
-import 'package:banda/services/db.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:banda/infra/store.dart';
+import 'package:sqlite3/sqlite3.dart';
 import 'package:uuid/uuid.dart';
 
 class Repository {
   final Database db;
   Repository(this.db);
-  static Future<Database> connect() => DB().connection;
+  static Future<Database> connect() => Store().connection;
 
   static String getId() {
     return Uuid().v4();
