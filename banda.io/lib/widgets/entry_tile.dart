@@ -79,6 +79,13 @@ class EntryTile extends StatelessWidget {
               fontWeight: FontWeight.w400,
             ),
           ),
+          Text(
+            entry.note,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelSmall!.copyWith(
+              fontWeight: FontWeight.w400,
+            ),
+          ),
         ],
       ),
       trailing: MoneyText(entry.amount),

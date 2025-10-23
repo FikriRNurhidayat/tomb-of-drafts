@@ -2,9 +2,11 @@ import 'package:banda/decorations/input_styles.dart';
 import 'package:banda/entity/account.dart';
 import 'package:banda/entity/category.dart';
 import 'package:banda/entity/entry.dart';
+import 'package:banda/entity/label.dart';
 import 'package:banda/providers/account_provider.dart';
 import 'package:banda/providers/category_provider.dart';
 import 'package:banda/providers/entry_provider.dart';
+import 'package:banda/providers/label_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -30,6 +32,7 @@ class _EditEntryScreenState extends State<EditEntryScreen> {
   double? _amount;
   String? _categoryId;
   String? _accountId;
+  List<String>? _labelIds;
   DateTime? _date;
   TimeOfDay? _time;
 
@@ -143,6 +146,7 @@ class _EditEntryScreenState extends State<EditEntryScreen> {
     final theme = Theme.of(context);
     final categoryProvider = context.watch<CategoryProvider>();
     final accountProvider = context.watch<AccountProvider>();
+    final labelProvider = context.watch<LabelProvider>();
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -166,6 +170,7 @@ class _EditEntryScreenState extends State<EditEntryScreen> {
         future: Future.wait([
           categoryProvider.search(),
           accountProvider.search(),
+          labelProvider.search(),
         ]),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -178,6 +183,7 @@ class _EditEntryScreenState extends State<EditEntryScreen> {
 
           final categories = snapshot.data![0] as List<Category>;
           final accounts = snapshot.data![1] as List<Account>;
+          final labels = snapshot.data![2] as List<Label>;
 
           return Padding(
             padding: const EdgeInsets.all(16.0),
@@ -321,6 +327,34 @@ class _EditEntryScreenState extends State<EditEntryScreen> {
                       );
                     }).toList(),
                     onChanged: (value) => _accountId = value ?? '',
+                  ),
+                  FormField<List<String>>(
+                    initialValue: const [],
+                    validator: (values) => values == null || values.isEmpty
+                        ? 'Pick at least one'
+                        : null,
+                    builder: (state) {
+                      return Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: labels.map((label) {
+                          final selected = state.value!.contains(label.id);
+                          return FilterChip(
+                            label: Text(label.name),
+                            selected: selected,
+                            onSelected: (bool value) {
+                              final current = List<String>.from(state.value!);
+                              if (value) {
+                                current.add(label.id);
+                              } else {
+                                current.remove(label.id);
+                              }
+                              state.didChange(current);
+                            },
+                          );
+                        }).toList(),
+                      );
+                    },
                   ),
                 ],
               ),
