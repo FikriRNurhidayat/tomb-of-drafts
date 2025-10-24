@@ -13,6 +13,7 @@ class Entry {
   final double amount;
   final EntryStatus status;
   final DateTime timestamp;
+  final bool readonly;
   final String accountId;
   final String accountName;
   final String accountHolderName;
@@ -27,6 +28,7 @@ class Entry {
     required this.amount,
     required this.status,
     required this.timestamp,
+    required this.readonly,
     required this.accountId,
     required this.accountName,
     required this.accountHolderName,
@@ -43,6 +45,7 @@ class Entry {
       amount: row["amount"],
       status: EntryStatus.values.firstWhere((e) => e.label == row["status"], orElse: () => EntryStatus.unknown),
       timestamp: DateTime.parse(row["timestamp"]),
+      readonly: row["readonly"] == 1,
       accountId: row["account_id"],
       accountName: row["account_name"],
       accountHolderName: row["account_holder_name"],

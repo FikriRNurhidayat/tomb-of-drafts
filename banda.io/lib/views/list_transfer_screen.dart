@@ -33,7 +33,10 @@ class _ListTransferScreenState extends State<ListTransferScreen> {
                 return TransferTile(transfer);
               },
               separatorBuilder: (context, index) {
-                return Divider();
+                return Divider(
+                  height: 0,
+                  thickness: 1,
+                );
               },
             ),
           );

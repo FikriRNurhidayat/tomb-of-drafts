@@ -2,6 +2,7 @@ import 'package:banda/providers/account_provider.dart';
 import 'package:banda/providers/category_provider.dart';
 import 'package:banda/providers/entry_provider.dart';
 import 'package:banda/providers/label_provider.dart';
+import 'package:banda/providers/metric_provider.dart';
 import 'package:banda/providers/transfer_provider.dart';
 import 'package:banda/repositories/account_repository.dart';
 import "package:banda/repositories/category_repository.dart";
@@ -34,6 +35,13 @@ void main() async {
           create: (_) => TransferProvider(transferRepository),
         ),
         ChangeNotifierProvider(create: (_) => LabelProvider(labelRepository)),
+        ChangeNotifierProvider(
+          create: (_) => MetricProvider(
+            accountRepository: accountRepository,
+            categoryRepository: categoryRepository,
+            entryRepository: entryRepository,
+          ),
+        ),
       ],
       child: const BandaApp(),
     ),

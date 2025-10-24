@@ -10,6 +10,43 @@ class EntryRepository extends Repository {
     return EntryRepository._(db);
   }
 
+
+  Future<double> sum() async {
+    try {
+      final rows = db.select(
+        "SELECT SUM(amount) AS entries_amount FROM entries WHERE deleted_at IS NULL",
+      );
+
+      if (rows.isEmpty) {
+        return 0;
+      }
+
+      return rows.first["entries_amount"];
+    }
+
+    catch(error) {
+      rethrow;
+    }
+  }
+
+  Future<int> count() async {
+    try {
+      final rows = db.select(
+        "SELECT COUNT(*) AS entries_count FROM entries WHERE deleted_at IS NULL",
+      );
+
+      if (rows.isEmpty) {
+        return 0;
+      }
+
+      return rows.first["entries_count"];
+    }
+
+    catch(error) {
+      rethrow;
+    }
+  }
+
   Future<Entry> create({
     required String note,
     required double amount,
@@ -32,13 +69,14 @@ class EntryRepository extends Repository {
     }
 
     db.execute(
-      "INSERT INTO entries (id, note, amount, timestamp, status, category_id, account_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO entries (id, note, amount, timestamp, status, readonly, category_id, account_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
       [
         id,
         note,
         amount,
         timestamp.toIso8601String(),
         status.label,
+        0,
         category["id"],
         account["id"],
         now.toIso8601String(),
@@ -52,6 +90,7 @@ class EntryRepository extends Repository {
       amount: amount,
       timestamp: timestamp,
       status: status,
+      readonly: false,
       categoryId: categoryId,
       categoryName: category["name"],
       accountId: accountId,
@@ -99,6 +138,7 @@ class EntryRepository extends Repository {
         entries.amount,
         entries.timestamp,
         entries.status,
+        entries.readonly,
         entries.category_id,
         categories.name AS category_name,
         entries.account_id,
@@ -129,6 +169,7 @@ class EntryRepository extends Repository {
             entries.amount,
             entries.timestamp,
             entries.status,
+            entries.readonly,
             entries.category_id,
             categories.name AS category_name,
             entries.account_id,

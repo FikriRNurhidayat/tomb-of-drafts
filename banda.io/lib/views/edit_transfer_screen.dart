@@ -1,4 +1,6 @@
 import 'package:banda/decorations/input_styles.dart';
+import 'package:banda/entity/transfer.dart';
+import 'package:banda/helpers/date_helper.dart';
 import 'package:banda/providers/account_provider.dart';
 import 'package:banda/providers/transfer_provider.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +8,9 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class EditTransferScreen extends StatefulWidget {
-  const EditTransferScreen({super.key});
+  final Transfer? transfer;
+
+  const EditTransferScreen({super.key, this.transfer});
 
   @override
   State<EditTransferScreen> createState() => _EditTransferScreenState();
@@ -16,13 +20,35 @@ class _EditTransferScreenState extends State<EditTransferScreen> {
   final _formKey = GlobalKey<FormState>();
   final _dateController = TextEditingController();
   final _timeController = TextEditingController();
-  final _dateFormatter = DateFormat("d MMMM yyyy");
 
+  String? _id;
   double? _amount;
   String? _fromId;
   String? _toId;
   DateTime? _date;
   TimeOfDay? _time;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.transfer != null) {
+      final transfer = widget.transfer!;
+      _id = transfer.id;
+      _amount = transfer.amount;
+      _fromId = transfer.fromAccountId;
+      _toId = transfer.toAccountId;
+      _date = DateTime(
+        transfer.timestamp.year,
+        transfer.timestamp.month,
+        transfer.timestamp.day,
+      );
+      _time = TimeOfDay.fromDateTime(transfer.timestamp);
+
+      _dateController.text = DateHelper.formatDate(_date!);
+      _timeController.text = DateHelper.formatTime(_time!);
+    }
+  }
 
   void _submit() {
     final transferProvider = context.read<TransferProvider>();
@@ -38,12 +64,28 @@ class _EditTransferScreenState extends State<EditTransferScreen> {
         _time!.minute,
       );
 
-      transferProvider.add(
-        amount: _amount!,
-        timestamp: timestamp,
-        fromId: _fromId!,
-        toId: _toId!,
-      );
+      if (_id == null) {
+        print("EDITING....");
+
+        transferProvider.add(
+          amount: _amount!,
+          timestamp: timestamp,
+          fromId: _fromId!,
+          toId: _toId!,
+        );
+      }
+
+      if (_id != null) {
+        print("UPDATING....");
+
+        transferProvider.update(
+          id: _id!,
+          amount: _amount!,
+          timestamp: timestamp,
+          fromId: _fromId!,
+          toId: _toId!,
+        );
+      }
 
       Navigator.pop(context);
     }
@@ -61,7 +103,7 @@ class _EditTransferScreenState extends State<EditTransferScreen> {
     if (!mounted || choosenDate == null) return;
 
     _date = choosenDate;
-    _dateController.text = _dateFormatter.format(choosenDate);
+    _dateController.text = DateHelper.formatDate(choosenDate);
   }
 
   void _pickTime() async {
@@ -148,6 +190,7 @@ class _EditTransferScreenState extends State<EditTransferScreen> {
                 spacing: 16,
                 children: [
                   TextFormField(
+                    initialValue: _amount?.toInt().toString(),
                     decoration: InputStyles.field(
                       hintText: "Enter amount...",
                       labelText: "Amount",
@@ -193,6 +236,7 @@ class _EditTransferScreenState extends State<EditTransferScreen> {
                     ],
                   ),
                   DropdownButtonFormField(
+                    initialValue: _fromId,
                     decoration: InputStyles.field(
                       labelText: "From",
                       hintText: "Select source account...",
@@ -207,6 +251,7 @@ class _EditTransferScreenState extends State<EditTransferScreen> {
                     onChanged: (value) => _fromId = value ?? '',
                   ),
                   DropdownButtonFormField(
+                    initialValue: _toId,
                     decoration: InputStyles.field(
                       labelText: "To",
                       hintText: "Select target account...",

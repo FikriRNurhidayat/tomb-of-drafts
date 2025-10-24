@@ -37,7 +37,10 @@ class _ListEntryScreenState extends State<ListEntryScreen> {
               return EntryTile(entry);
             },
             separatorBuilder: (context, index) {
-              return Divider();
+              return Divider(
+                height: 0,
+                thickness: 1,
+              );
             },
           );
         } else {

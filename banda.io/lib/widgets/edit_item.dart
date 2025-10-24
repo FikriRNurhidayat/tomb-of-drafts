@@ -146,7 +146,7 @@ class _EditItemState<I extends Itemable, P extends ItemableProvider<I>>
                 final isEditing = item.id == editId;
 
                 return ListTile(
-                  leading: item.deletable! && isEditing
+                  leading: item.readonly! && isEditing
                       ? GestureDetector(
                           child: Icon(Icons.delete),
                           onTap: () => _delete(item),

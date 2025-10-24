@@ -1,5 +1,6 @@
 import 'package:banda/entity/transfer.dart';
 import 'package:banda/providers/transfer_provider.dart';
+import 'package:banda/views/edit_transfer_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -37,7 +38,16 @@ class TransferTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return GestureDetector(
+    return ListTile(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            fullscreenDialog: true,
+            builder: (_) => EditTransferScreen(transfer: transfer),
+          ),
+        );
+      },
       onLongPress: () {
         showDialog(
           context: context,
@@ -69,7 +79,7 @@ class TransferTile extends StatelessWidget {
           },
         );
       },
-      child: Container(
+      title: Container(
         padding: EdgeInsets.all(16),
         child: Row(
           spacing: 16,

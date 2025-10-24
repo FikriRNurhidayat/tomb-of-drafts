@@ -51,7 +51,7 @@ class MoneyText extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Text(
-      "${getSign()} ${getAmount()} $currency",
+      "${useSymbol ? '${getSign()} ' : ''}${getAmount()} $currency",
       textAlign: TextAlign.center,
       style: theme.textTheme.titleMedium!.apply(
         color: getColor(context),

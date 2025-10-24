@@ -3,6 +3,7 @@ import 'package:banda/views/edit_entry_screen.dart';
 import 'package:banda/views/edit_category_screen.dart';
 import 'package:banda/views/edit_label_screen.dart';
 import 'package:banda/views/edit_transfer_screen.dart';
+import 'package:banda/views/analytic_screen.dart';
 import 'package:banda/views/list_account_screen.dart';
 import 'package:banda/views/list_entry_screen.dart';
 import 'package:banda/views/list_transfer_screen.dart';
@@ -45,11 +46,6 @@ class _MainScreenState extends State<MainScreen> {
   int _current = 0;
 
   final List<Screen> _screens = [
-    Screen(
-      title: "Home",
-      icon: Icons.home,
-      child: Center(child: Text("Home")),
-    ),
     Screen(
       title: "Ledger",
       icon: Icons.book,
@@ -147,11 +143,8 @@ class _MainScreenState extends State<MainScreen> {
         );
       },
     ),
-    Screen(
-      title: "Tools",
-      icon: Icons.construction,
-      child: ToolScreen(),
-    ),
+    Screen(title: "Analytics", icon: Icons.analytics, child: AnalyticScreen()),
+    Screen(title: "Tools", icon: Icons.construction, child: ToolScreen()),
   ];
 
   List<Widget> _menu() {

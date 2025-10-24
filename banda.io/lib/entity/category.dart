@@ -5,7 +5,7 @@ class Category extends Itemable {
   final String id;
   @override
   final String name;
-  final bool deletable;
+  final bool readonly;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -13,7 +13,7 @@ class Category extends Itemable {
   Category({
     required this.id,
     required this.name,
-    required this.deletable,
+    required this.readonly,
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
@@ -23,7 +23,7 @@ class Category extends Itemable {
     return Category(
       id: row["id"],
       name: row["name"],
-      deletable: row["deletable"] == 1,
+      readonly: row["readonly"] == 1,
       createdAt: DateTime.parse(row["created_at"]),
       updatedAt: DateTime.parse(row["updated_at"]),
       deletedAt: row["deleted_at"],

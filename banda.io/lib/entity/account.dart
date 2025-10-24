@@ -12,6 +12,7 @@ class Account {
   final String name;
   final String holderName;
   final AccountKind kind;
+  double? balance;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -22,16 +23,18 @@ class Account {
     required this.kind,
     required this.createdAt,
     required this.updatedAt,
+    this.balance,
   });
 
-  factory Account.fromRow(Map<dynamic, dynamic> map) {
+  factory Account.fromRow(Map<dynamic, dynamic> row) {
     return Account(
-      id: map["id"],
-      name: map["name"],
-      holderName: map["holder_name"],
-      kind: AccountKind.values.firstWhere((e) => e.label == map["kind"]),
-      createdAt: DateTime.parse(map["created_at"]),
-      updatedAt: DateTime.parse(map["updated_at"]),
+      id: row["id"],
+      name: row["name"],
+      holderName: row["holder_name"],
+      kind: AccountKind.values.firstWhere((e) => e.label == row["kind"]),
+      balance: row["balance"],
+      createdAt: DateTime.parse(row["created_at"]),
+      updatedAt: DateTime.parse(row["updated_at"]),
     );
   }
 }

@@ -21,17 +21,27 @@ class _ListAccountScreenState extends State<ListAccountScreen> {
       future: accountProvider.search(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          if (snapshot.data!.isEmpty) {
-            return Empty("Accounts you add appear here", icon: Icons.wallet);
+          if (snapshot.hasError) {
+            return Empty("Something went wrong", icon: Icons.error);
           }
 
-          return ListView.builder(
-            itemCount: snapshot.data?.length ?? 0,
-            itemBuilder: (BuildContext context, int index) {
-              final Account account = snapshot.data![index];
-              return AccountTile(account);
-            },
-          );
+          if (snapshot.hasData) {
+            return ListView.separated(
+              separatorBuilder: (context, index) {
+                return Divider(
+                  height: 0,
+                  thickness: 1,
+                );
+              },
+              itemCount: snapshot.data?.length ?? 0,
+              itemBuilder: (BuildContext context, int index) {
+                final Account account = snapshot.data![index];
+                return AccountTile(account);
+              },
+            );
+          }
+
+          return Empty("Accounts you add appear here", icon: Icons.wallet);
         } else {
           return CircularProgressIndicator();
         }

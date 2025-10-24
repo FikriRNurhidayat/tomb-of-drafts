@@ -21,81 +21,22 @@ class TransferRepository extends Repository {
     final id = Repository.getId();
     final now = DateTime.now();
 
-    final category = await _getCategoryByName("Transfer");
-    if (category == null) {
-      throw UnimplementedError();
-    }
-
-    final fromAccount = await _getAccount(fromId);
-    if (fromAccount == null) {
-      throw UnimplementedError();
-    }
-
-    final toAccount = await _getAccount(toId);
-    if (toAccount == null) {
-      throw UnimplementedError();
-    }
-
-    final fromName = "${fromAccount["holder_name"]}: ${fromAccount["name"]}";
-    final toName = "${toAccount["holder_name"]}: ${toAccount["name"]}";
-
-    final note = "Transfer from $fromName to $toName";
-
-    final Map<String, dynamic> fromEntry = {
-      "id": Uuid().v4(),
-      "note": "Transfer to $toName",
-      "amount": amount * -1,
-      "status": EntryStatus.done.label,
-      "timestamp": timestamp.toIso8601String(),
-      "category_id": category["id"],
-      "account_id": fromAccount["id"],
-      "created_at": now.toIso8601String(),
-      "updated_at": now.toIso8601String(),
-    };
-
-    final Map<String, dynamic> toEntry = {
-      "id": Uuid().v4(),
-      "note": "Transfer from $fromName",
-      "amount": amount,
-      "status": EntryStatus.done.label,
-      "timestamp": timestamp.toIso8601String(),
-      "category_id": category["id"],
-      "account_id": toAccount["id"],
-      "created_at": now.toIso8601String(),
-      "updated_at": now.toIso8601String(),
-    };
-
     db.execute("BEGIN TRANSACTION");
     try {
-      db.execute(
-        "INSERT INTO entries (id, note, amount, status, timestamp, category_id, account_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [
-          fromEntry["id"],
-          fromEntry["note"],
-          fromEntry["amount"],
-          fromEntry["status"],
-          fromEntry["timestamp"],
-          fromEntry["category_id"],
-          fromEntry["account_id"],
-          fromEntry["created_at"],
-          fromEntry["updated_at"],
-        ],
+      final preps = await _prepareTransfer(
+        fromId: fromId,
+        toId: toId,
+        timestamp: timestamp,
+        now: now,
+        amount: amount,
       );
 
-      db.execute(
-        "INSERT INTO entries (id, note, amount, status, timestamp, category_id, account_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [
-          toEntry["id"],
-          toEntry["note"],
-          toEntry["amount"],
-          toEntry["status"],
-          toEntry["timestamp"],
-          toEntry["category_id"],
-          toEntry["account_id"],
-          toEntry["created_at"],
-          toEntry["updated_at"],
-        ],
-      );
+      final fromEntry = preps["fromEntry"];
+      final toEntry = preps["toEntry"];
+      final note = preps["note"];
+
+      await _insertEntry(fromEntry);
+      await _insertEntry(toEntry);
 
       db.execute(
         "INSERT INTO transfers (id, note, amount, timestamp, from_entry_id, to_entry_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
@@ -113,6 +54,8 @@ class TransferRepository extends Repository {
 
       db.execute('COMMIT');
     } catch (e) {
+      print(e);
+
       db.execute('ROLLBACK');
     }
 
@@ -123,15 +66,56 @@ class TransferRepository extends Repository {
     required String id,
     required double amount,
     required DateTime timestamp,
+    required String fromId,
+    required String toId,
   }) async {
     final now = DateTime.now();
 
-    db.execute(
-      "UPDATE transfers SET amount = ?, timestamp = ?, updated_at = ? WHERE id = ?",
-      [amount, timestamp.toString(), now.toIso8601String(), id],
-    );
+    db.execute("BEGIN TRANSACTION");
+    try {
+      final currentTransfer = await _getTransfer(id);
+      if (currentTransfer == null) return null;
 
-    return get(id);
+      final preps = await _prepareTransfer(
+        fromId: fromId,
+        toId: toId,
+        timestamp: timestamp,
+        now: now,
+        amount: amount,
+      );
+
+      final fromEntry = preps["fromEntry"];
+      final toEntry = preps["toEntry"];
+      final note = preps["note"];
+
+      db.execute("DELETE FROM entries WHERE id IN (?, ?)", [
+        currentTransfer["from_entry_id"],
+        currentTransfer["to_entry_id"],
+      ]);
+
+      await _insertEntry(fromEntry);
+      await _insertEntry(toEntry);
+
+      db.execute(
+        "UPDATE transfers SET note = ?, amount = ?, from_entry_id = ?, to_entry_id = ?,timestamp = ?, updated_at = ? WHERE id = ?",
+        [
+          note,
+          amount,
+          fromEntry["id"],
+          toEntry["id"],
+          timestamp.toIso8601String(),
+          now.toIso8601String(),
+          id,
+        ],
+      );
+
+      db.execute("COMMIT");
+
+      return get(id);
+    } catch (error) {
+      db.execute("ROLLBACK");
+      return null;
+    }
   }
 
   Future<Transfer?> get(String id) async {
@@ -221,7 +205,7 @@ class TransferRepository extends Repository {
 
   Future<Map?> _getCategoryByName(String name) async {
     final ResultSet rows = db.select(
-      "SELECT * FROM categories FROM where name = ?",
+      "SELECT * FROM categories WHERE name = ?",
       [name],
     );
 
@@ -242,5 +226,87 @@ class TransferRepository extends Repository {
     }
 
     return rows.first;
+  }
+
+  Future<Map?> _getTransfer(String id) async {
+    final ResultSet rows = db.select("SELECT * FROM transfers WHERE id = ?", [
+      id,
+    ]);
+    if (rows.isEmpty) return null;
+    return rows.first;
+  }
+
+  Future<Map> _prepareTransfer({
+    required String fromId,
+    required String toId,
+    required DateTime timestamp,
+    required DateTime now,
+    required double amount,
+  }) async {
+    final category = await _getCategoryByName("Transfer");
+    if (category == null) {
+      throw UnimplementedError();
+    }
+
+    final fromAccount = await _getAccount(fromId);
+    if (fromAccount == null) {
+      throw UnimplementedError();
+    }
+
+    final toAccount = await _getAccount(toId);
+    if (toAccount == null) {
+      throw UnimplementedError();
+    }
+
+    final fromName = "${fromAccount["holder_name"]}: ${fromAccount["name"]}";
+    final toName = "${toAccount["holder_name"]}: ${toAccount["name"]}";
+
+    final note = "Transfer from $fromName to $toName";
+
+    final Map<String, dynamic> fromEntry = {
+      "id": Uuid().v4(),
+      "note": "Transfer to $toName",
+      "amount": amount * -1,
+      "status": EntryStatus.done.label,
+      "readonly": true,
+      "timestamp": timestamp.toIso8601String(),
+      "category_id": category["id"],
+      "account_id": fromAccount["id"],
+      "created_at": now.toIso8601String(),
+      "updated_at": now.toIso8601String(),
+    };
+
+    final Map<String, dynamic> toEntry = {
+      "id": Uuid().v4(),
+      "note": "Transfer from $fromName",
+      "amount": amount,
+      "status": EntryStatus.done.label,
+      "readonly": true,
+      "timestamp": timestamp.toIso8601String(),
+      "category_id": category["id"],
+      "account_id": toAccount["id"],
+      "created_at": now.toIso8601String(),
+      "updated_at": now.toIso8601String(),
+    };
+
+    return {"fromEntry": fromEntry, "toEntry": toEntry, "note": note};
+  }
+
+  Future<void> _insertEntry(Map entry) async {
+    db.execute(
+      "INSERT INTO entries (id, note, amount, status, readonly, timestamp, category_id, account_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [
+        entry["id"],
+        entry["note"],
+        entry["amount"],
+        entry["status"],
+        entry["readonly"],
+        entry["timestamp"],
+        entry["category_id"],
+        entry["account_id"],
+        entry["created_at"],
+        entry["updated_at"],
+      ],
+    );
   }
 }

@@ -68,6 +68,17 @@ class AccountRepository extends Repository {
     return Account.fromRow(result.first);
   }
 
+  Future<List<Account>> withBalances() async {
+    final ResultSet rows = db.select("""
+      SELECT accounts.*, SUM(entries.amount) AS balance
+      FROM accounts
+      LEFT JOIN entries ON entries.account_id = accounts.id
+      GROUP BY accounts.id
+      ORDER BY balance DESC
+    """);
+    return rows.map((row) => Account.fromRow(row)).toList();
+  }
+
   Future<List<Account>> search() async {
     final ResultSet rows = db.select("SELECT * FROM accounts");
     return rows.map((row) => Account.fromRow(row)).toList();

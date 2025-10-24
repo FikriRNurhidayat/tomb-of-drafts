@@ -3,12 +3,12 @@ import 'package:banda/entity/account.dart';
 import 'package:banda/entity/category.dart';
 import 'package:banda/entity/entry.dart';
 import 'package:banda/entity/label.dart';
+import 'package:banda/helpers/date_helper.dart';
 import 'package:banda/providers/account_provider.dart';
 import 'package:banda/providers/category_provider.dart';
 import 'package:banda/providers/entry_provider.dart';
 import 'package:banda/providers/label_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class EditEntryScreen extends StatefulWidget {
@@ -24,7 +24,6 @@ class _EditEntryScreenState extends State<EditEntryScreen> {
   final _formKey = GlobalKey<FormState>();
   final _dateController = TextEditingController();
   final _timeController = TextEditingController();
-  final _dateFormatter = DateFormat("d MMMM yyyy");
 
   String? _id;
   String? _note;
@@ -32,15 +31,8 @@ class _EditEntryScreenState extends State<EditEntryScreen> {
   double? _amount;
   String? _categoryId;
   String? _accountId;
-  List<String>? _labelIds;
   DateTime? _date;
   TimeOfDay? _time;
-
-  _formatTime(TimeOfDay time) {
-    final hour = time.hour.toString().padLeft(2, '0');
-    final minute = time.minute.toString().padLeft(2, '0');
-    return "$hour:$minute";
-  }
 
   @override
   void initState() {
@@ -61,8 +53,8 @@ class _EditEntryScreenState extends State<EditEntryScreen> {
       );
       _time = TimeOfDay.fromDateTime(entry.timestamp);
 
-      _dateController.text = _dateFormatter.format(_date!);
-      _timeController.text = _formatTime(_time!);
+      _dateController.text = DateHelper.formatDate(_date!);
+      _timeController.text = DateHelper.formatTime(_time!);
     }
   }
 
@@ -119,7 +111,7 @@ class _EditEntryScreenState extends State<EditEntryScreen> {
     if (!mounted || choosenDate == null) return;
 
     _date = choosenDate;
-    _dateController.text = _dateFormatter.format(choosenDate);
+    _dateController.text = DateHelper.formatDate(choosenDate);
   }
 
   void _pickTime() async {
@@ -131,7 +123,7 @@ class _EditEntryScreenState extends State<EditEntryScreen> {
     if (!mounted || choosenTime == null) return;
 
     _time = choosenTime;
-    _timeController.text = _formatTime(choosenTime);
+    _timeController.text = DateHelper.formatTime(choosenTime);
   }
 
   @override
@@ -207,7 +199,7 @@ class _EditEntryScreenState extends State<EditEntryScreen> {
                       labelText: "Amount",
                       hintText: "Enter amount...",
                     ),
-                    initialValue: _amount?.toString(),
+                    initialValue: _amount?.toInt().toString(),
                     keyboardType: TextInputType.numberWithOptions(
                       signed: true,
                       decimal: true,
@@ -284,7 +276,7 @@ class _EditEntryScreenState extends State<EditEntryScreen> {
                           ),
                           initialValue: _categoryId,
                           items: categories
-                              .where((category) => category.deletable)
+                              .where((category) => !category.readonly)
                               .map((c) {
                                 return DropdownMenuItem(
                                   value: c.id,
