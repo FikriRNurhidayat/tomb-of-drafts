@@ -9,7 +9,7 @@ import "package:banda/repositories/category_repository.dart";
 import 'package:banda/repositories/entry_repository.dart';
 import 'package:banda/repositories/label_repository.dart';
 import 'package:banda/repositories/transfer_repository.dart';
-import 'package:banda/views/main_screen.dart';
+import 'package:banda/views/entrypoint.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -66,7 +66,7 @@ class BandaApp extends StatelessWidget {
         textTheme: dark.textTheme.apply(fontFamily: 'Eczar'),
       ),
       themeMode: ThemeMode.system,
-      home: const MainScreen(),
+      home: const Entrypoint(),
     );
   }
 }

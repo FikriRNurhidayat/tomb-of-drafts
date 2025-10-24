@@ -1,5 +1,6 @@
 import 'package:banda/entity/transfer.dart';
 import 'package:banda/providers/transfer_provider.dart';
+import 'package:banda/views/edit_transfer_screen.dart';
 import 'package:banda/widgets/transfer_tile.dart';
 import 'package:banda/widgets/empty.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,20 @@ class ListTransferScreen extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() => _ListTransferScreenState();
+
+  static String title = "Transfers";
+  static IconData icon = Icons.sync_alt;
+  static Widget fabBuilder(BuildContext context) {
+    return FloatingActionButton(
+      child: Icon(Icons.add),
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => EditTransferScreen()),
+        );
+      },
+    );
+  }
 }
 
 class _ListTransferScreenState extends State<ListTransferScreen> {
@@ -33,10 +48,7 @@ class _ListTransferScreenState extends State<ListTransferScreen> {
                 return TransferTile(transfer);
               },
               separatorBuilder: (context, index) {
-                return Divider(
-                  height: 0,
-                  thickness: 1,
-                );
+                return Divider(height: 0, thickness: 1);
               },
             ),
           );

@@ -7,6 +7,9 @@ import 'package:provider/provider.dart';
 class AnalyticScreen extends StatelessWidget {
   const AnalyticScreen({super.key});
 
+  static String title = "Analytics";
+  static IconData icon = Icons.analytics;
+
   @override
   Widget build(BuildContext context) {
     final metricProvider = context.watch<MetricProvider>();

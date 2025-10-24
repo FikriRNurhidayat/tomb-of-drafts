@@ -10,6 +10,9 @@ class ToolScreen extends StatefulWidget {
 
   @override
   State<ToolScreen> createState() => _ToolScreenState();
+
+  static String title = "Tools";
+  static IconData icon = Icons.construction;
 }
 
 class _ToolScreenState extends State<ToolScreen> {

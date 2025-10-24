@@ -8,6 +8,10 @@ import 'package:banda/providers/account_provider.dart';
 import 'package:banda/providers/category_provider.dart';
 import 'package:banda/providers/entry_provider.dart';
 import 'package:banda/providers/label_provider.dart';
+import 'package:banda/views/edit_category_screen.dart';
+import 'package:banda/views/edit_label_screen.dart';
+import 'package:banda/widgets/multi_select_form_field.dart';
+import 'package:banda/widgets/select_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -31,6 +35,7 @@ class _EditEntryScreenState extends State<EditEntryScreen> {
   double? _amount;
   String? _categoryId;
   String? _accountId;
+  List<String>? _labelIds;
   DateTime? _date;
   TimeOfDay? _time;
 
@@ -177,7 +182,7 @@ class _EditEntryScreenState extends State<EditEntryScreen> {
           final accounts = snapshot.data![1] as List<Account>;
           final labels = snapshot.data![2] as List<Label>;
 
-          return Padding(
+          return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Form(
               key: _formKey,
@@ -241,112 +246,96 @@ class _EditEntryScreenState extends State<EditEntryScreen> {
                       ),
                     ],
                   ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: DropdownButtonFormField(
-                          decoration: InputStyles.field(
-                            labelText: "Status",
-                            hintText: "Select status...",
-                          ),
-                          initialValue: _status,
-                          items: EntryStatus.values.map((c) {
-                            return DropdownMenuItem(
-                              value: c,
-                              child: Text(
-                                c.label,
-                                style: TextStyle(
-                                  fontFamily:
-                                      theme.textTheme.headlineSmall!.fontFamily,
-                                  fontWeight:
-                                      theme.textTheme.bodySmall!.fontWeight,
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                          onChanged: (value) => _status = value,
+                  SelectFormField<EntryStatus>(
+                    initialValue: _status,
+                    decoration: InputStyles.field(
+                      labelText: "Status",
+                      hintText: "Select status...",
+                    ),
+                    onSaved: (value) => _status = value,
+                    options: EntryStatus.values.map((c) {
+                      return SelectItem(value: c, label: c.label);
+                    }).toList(),
+                  ),
+                  SelectFormField<String>(
+                    initialValue: _categoryId,
+                    decoration: InputStyles.field(
+                      labelText: "Category",
+                      hintText: "Select category...",
+                    ),
+                    onSaved: (value) => _categoryId = value,
+                    actions: [
+                      ActionChip(
+                        avatar: Icon(
+                          Icons.add,
+                          color: theme.colorScheme.outline,
                         ),
-                      ),
-                      SizedBox(width: 16),
-                      Expanded(
-                        child: DropdownButtonFormField(
-                          decoration: InputStyles.field(
-                            labelText: "Category",
-                            hintText: "Select category...",
+                        label: Text(
+                          "New category",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w100,
+                            color: theme.colorScheme.outline,
                           ),
-                          initialValue: _categoryId,
-                          items: categories
-                              .where((category) => !category.readonly)
-                              .map((c) {
-                                return DropdownMenuItem(
-                                  value: c.id,
-                                  child: Text(
-                                    c.name,
-                                    style: TextStyle(
-                                      fontFamily: theme
-                                          .textTheme
-                                          .headlineSmall!
-                                          .fontFamily,
-                                      fontWeight:
-                                          theme.textTheme.bodySmall!.fontWeight,
-                                    ),
-                                  ),
-                                );
-                              })
-                              .toList(),
-                          onChanged: (value) => _categoryId = value ?? '',
                         ),
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => EditCategoryScreen(),
+                            ),
+                          );
+                        },
                       ),
                     ],
+                    options: categories.where((c) => !c.readonly).map((c) {
+                      return SelectItem(value: c.id, label: c.name);
+                    }).toList(),
                   ),
-                  DropdownButtonFormField(
+                  SelectFormField(
                     decoration: InputStyles.field(
                       labelText: "Account",
                       hintText: "Select account...",
                     ),
                     initialValue: _accountId,
-                    items: accounts.map((i) {
-                      return DropdownMenuItem(
+                    options: accounts.map((i) {
+                      return SelectItem(
                         value: i.id,
-                        child: Text(
-                          "${i.holderName}: ${i.name}",
-                          style: TextStyle(
-                            fontFamily:
-                                theme.textTheme.headlineSmall!.fontFamily,
-                            fontWeight: theme.textTheme.bodySmall!.fontWeight,
-                          ),
-                        ),
+                        label: "${i.name} — ${i.holderName}",
                       );
                     }).toList(),
-                    onChanged: (value) => _accountId = value ?? '',
+                    onSaved: (value) => _accountId = value ?? '',
                   ),
-                  FormField<List<String>>(
-                    initialValue: const [],
-                    validator: (values) => values == null || values.isEmpty
-                        ? 'Pick at least one'
-                        : null,
-                    builder: (state) {
-                      return Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: labels.map((label) {
-                          final selected = state.value!.contains(label.id);
-                          return FilterChip(
-                            label: Text(label.name),
-                            selected: selected,
-                            onSelected: (bool value) {
-                              final current = List<String>.from(state.value!);
-                              if (value) {
-                                current.add(label.id);
-                              } else {
-                                current.remove(label.id);
-                              }
-                              state.didChange(current);
-                            },
+                  MultiSelectFormField<String>(
+                    decoration: InputStyles.field(
+                      labelText: "Labels",
+                      hintText: "Select labels...",
+                    ),
+                    actions: [
+                      ActionChip(
+                        avatar: Icon(
+                          Icons.add,
+                          color: theme.colorScheme.outline,
+                        ),
+                        label: Text(
+                          "New label",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w100,
+                            color: theme.colorScheme.outline,
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => EditLabelScreen(),
+                            ),
                           );
-                        }).toList(),
-                      );
-                    },
+                        },
+                      ),
+                    ],
+                    initialValue: _labelIds ?? [],
+                    options: labels.map((l) {
+                      return MultiSelectItem(value: l.id, label: l.name);
+                    }).toList(),
+                    onSaved: (value) => _labelIds = value,
                   ),
                 ],
               ),
