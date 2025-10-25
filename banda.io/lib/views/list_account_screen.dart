@@ -40,7 +40,7 @@ class _ListAccountScreenState extends State<ListAccountScreen> {
             return Empty("Something went wrong", icon: Icons.error);
           }
 
-          if (snapshot.hasData) {
+          if (snapshot.hasData && snapshot.data!.isNotEmpty) {
             return ListView.separated(
               separatorBuilder: (context, index) {
                 return Divider(height: 0, thickness: 1);

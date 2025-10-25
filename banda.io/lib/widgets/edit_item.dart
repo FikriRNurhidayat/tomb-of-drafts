@@ -124,6 +124,7 @@ class _EditItemState<I extends Itemable, P extends ItemableProvider<I>>
         builder: (context, snapshot) {
           if (!snapshot.hasData) return const CircularProgressIndicator();
           final items = snapshot.data!;
+
           return ListView(
             children: [
               ListTile(
@@ -139,14 +140,14 @@ class _EditItemState<I extends Itemable, P extends ItemableProvider<I>>
                   ),
                 ),
                 trailing: _createFocus.hasFocus
-                    ? IconButton(icon: Icon(Icons.check), onPressed: _create)
+                    ? GestureDetector(onTap: _create, child: Icon(Icons.check))
                     : null,
               ),
-              ...items.map((item) {
+              ...items.where((i) => !i.readonly!).map((item) {
                 final isEditing = item.id == editId;
 
                 return ListTile(
-                  leading: item.readonly! && isEditing
+                  leading: isEditing
                       ? GestureDetector(
                           child: Icon(Icons.delete),
                           onTap: () => _delete(item),

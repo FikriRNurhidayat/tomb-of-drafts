@@ -16,9 +16,11 @@ class TransferProvider extends ChangeNotifier {
     required DateTime timestamp,
     required String fromId,
     required String toId,
+    double? fee,
   }) async {
     await _repository.create(
       amount: amount,
+      fee: fee,
       timestamp: timestamp,
       fromId: fromId,
       toId: toId,
@@ -32,10 +34,12 @@ class TransferProvider extends ChangeNotifier {
     required DateTime timestamp,
     required String fromId,
     required String toId,
+    double? fee,
   }) async {
     await _repository.update(
       id: id,
       amount: amount,
+      fee: fee,
       timestamp: timestamp,
       fromId: fromId,
       toId: toId,

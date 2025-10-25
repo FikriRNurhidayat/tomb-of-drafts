@@ -1,3 +1,13 @@
+import 'package:banda/entity/label.dart';
+
+enum EntryType {
+  income('Income'),
+  expense('Expense');
+
+  final String label;
+  const EntryType(this.label);
+}
+
 enum EntryStatus {
   pending('Pending'),
   done('Done'),
@@ -21,6 +31,7 @@ class Entry {
   final String categoryName;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final List<Label>? labels;
 
   Entry({
     required this.id,
@@ -36,6 +47,7 @@ class Entry {
     required this.categoryName,
     required this.createdAt,
     required this.updatedAt,
+    this.labels,
   });
 
   factory Entry.fromRow(Map<dynamic, dynamic> row) {
@@ -43,7 +55,10 @@ class Entry {
       id: row["id"],
       note: row["note"],
       amount: row["amount"],
-      status: EntryStatus.values.firstWhere((e) => e.label == row["status"], orElse: () => EntryStatus.unknown),
+      status: EntryStatus.values.firstWhere(
+        (e) => e.label == row["status"],
+        orElse: () => EntryStatus.unknown,
+      ),
       timestamp: DateTime.parse(row["timestamp"]),
       readonly: row["readonly"] == 1,
       accountId: row["account_id"],
@@ -51,6 +66,7 @@ class Entry {
       accountHolderName: row["account_holder_name"],
       categoryId: row["category_id"],
       categoryName: row["category_name"],
+      labels: row["labels"],
       createdAt: DateTime.parse(row["created_at"]),
       updatedAt: DateTime.parse(row["updated_at"]),
     );

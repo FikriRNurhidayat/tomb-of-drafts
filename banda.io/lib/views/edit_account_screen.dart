@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:banda/decorations/input_styles.dart';
 import 'package:banda/entity/account.dart';
 import 'package:banda/providers/account_provider.dart';
+import 'package:banda/widgets/select_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -109,12 +110,12 @@ class _EditAccountScreenState extends State<EditAccountScreen> {
                     ? "Holder is required"
                     : null,
               ),
-              DropdownButtonFormField(
-                onChanged: (value) => _kind = value,
+              SelectFormField(
+                onSaved: (value) => _kind = value,
                 initialValue: _kind,
                 validator: (value) => value == null ? "Type is required" : null,
-                items: AccountKind.values.map((v) {
-                  return DropdownMenuItem(value: v, child: Text(v.label));
+                options: AccountKind.values.map((v) {
+                  return SelectItem(value: v, label: v.label);
                 }).toList(),
                 decoration: InputStyles.field(
                   labelText: "Type",

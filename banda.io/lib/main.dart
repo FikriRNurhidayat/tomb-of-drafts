@@ -1,6 +1,7 @@
 import 'package:banda/providers/account_provider.dart';
 import 'package:banda/providers/category_provider.dart';
 import 'package:banda/providers/entry_provider.dart';
+import 'package:banda/providers/filter_provider.dart';
 import 'package:banda/providers/label_provider.dart';
 import 'package:banda/providers/metric_provider.dart';
 import 'package:banda/providers/transfer_provider.dart';
@@ -42,6 +43,7 @@ void main() async {
             entryRepository: entryRepository,
           ),
         ),
+        ChangeNotifierProvider(create: (_) => FilterProvider()),
       ],
       child: const BandaApp(),
     ),

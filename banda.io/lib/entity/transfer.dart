@@ -2,6 +2,7 @@ class Transfer {
   final String id;
   final String note;
   final double amount;
+  final double? fee;
   final DateTime timestamp;
   final String fromAccountId;
   final String fromAccountName;
@@ -16,6 +17,7 @@ class Transfer {
     required this.id,
     required this.note,
     required this.amount,
+    required this.fee,
     required this.timestamp,
     required this.fromAccountId,
     required this.fromAccountName,
@@ -32,6 +34,7 @@ class Transfer {
       id: row["id"],
       note: row["note"],
       amount: row["amount"],
+      fee: row["fee"],
       timestamp: DateTime.parse(row["timestamp"]),
       fromAccountId: row["from_account_id"],
       fromAccountName: row["from_account_name"],

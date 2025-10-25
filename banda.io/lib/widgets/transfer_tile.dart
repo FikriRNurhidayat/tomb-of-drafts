@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 
 class TransferTile extends StatelessWidget {
   final Transfer transfer;
-  final DateFormat dateFormat = DateFormat("d MMM yyyy");
+  final DateFormat dateFormat = DateFormat("yyyy/MM/dd");
 
   TransferTile(this.transfer, {super.key});
 
@@ -80,9 +80,9 @@ class TransferTile extends StatelessWidget {
         );
       },
       title: Container(
-        padding: EdgeInsets.all(16),
+        padding: EdgeInsets.all(8),
         child: Row(
-          spacing: 16,
+          spacing: 8,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
@@ -92,7 +92,8 @@ class TransferTile extends StatelessWidget {
                   Text('From', style: theme.textTheme.titleSmall),
                   Text(
                     transfer.fromAccountName,
-                    style: theme.textTheme.titleMedium!.apply(
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall!.apply(
                       fontFamily: theme.textTheme.headlineSmall!.fontFamily,
                       color: theme.colorScheme.error,
                     ),
@@ -100,7 +101,9 @@ class TransferTile extends StatelessWidget {
                   Text(
                     transfer.fromAccountHolderName,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.labelSmall,
+                    style: theme.textTheme.labelSmall!.copyWith(
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
                 ],
               ),
@@ -113,6 +116,14 @@ class TransferTile extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  if (transfer.fee != null)
+                    Text(
+                      getAmount(transfer.fee!),
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.labelSmall!.apply(
+                        fontFamily: theme.textTheme.headlineSmall!.fontFamily,
+                      ),
+                    ),
                   Text(
                     getAmount(transfer.amount),
                     textAlign: TextAlign.center,
@@ -122,7 +133,9 @@ class TransferTile extends StatelessWidget {
                   ),
                   Text(
                     dateFormat.format(transfer.timestamp),
-                    style: theme.textTheme.labelSmall,
+                    style: theme.textTheme.labelSmall!.copyWith(
+                      fontWeight: FontWeight.w400,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -138,15 +151,18 @@ class TransferTile extends StatelessWidget {
                   Text('To', style: theme.textTheme.titleSmall),
                   Text(
                     transfer.toAccountName,
-                    style: theme.textTheme.titleMedium!.apply(
-                      fontFamily: theme.textTheme.headlineSmall!.fontFamily,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall!.apply(
+                      fontFamily: theme.textTheme.bodySmall!.fontFamily,
                       color: theme.colorScheme.primary,
                     ),
                   ),
                   Text(
                     transfer.toAccountHolderName,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.labelSmall,
+                    style: theme.textTheme.labelSmall!.copyWith(
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
                 ],
               ),

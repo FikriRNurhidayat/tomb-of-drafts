@@ -4,6 +4,10 @@ import 'package:intl/intl.dart';
 class DateHelper {
   static final dateFormat = DateFormat("d MMMM yyyy");
 
+  static formatDateRange(DateTimeRange dateRange) {
+    return "${dateFormat.format(dateRange.start)} - ${dateFormat.format(dateRange.end)}";
+  }
+
   static formatDate(DateTime date) {
     return dateFormat.format(date);
   }

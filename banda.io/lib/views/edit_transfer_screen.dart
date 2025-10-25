@@ -3,8 +3,9 @@ import 'package:banda/entity/transfer.dart';
 import 'package:banda/helpers/date_helper.dart';
 import 'package:banda/providers/account_provider.dart';
 import 'package:banda/providers/transfer_provider.dart';
+import 'package:banda/views/edit_account_screen.dart';
+import 'package:banda/widgets/select_form_field.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class EditTransferScreen extends StatefulWidget {
@@ -23,6 +24,7 @@ class _EditTransferScreenState extends State<EditTransferScreen> {
 
   String? _id;
   double? _amount;
+  double? _fee;
   String? _fromId;
   String? _toId;
   DateTime? _date;
@@ -36,6 +38,7 @@ class _EditTransferScreenState extends State<EditTransferScreen> {
       final transfer = widget.transfer!;
       _id = transfer.id;
       _amount = transfer.amount;
+      _fee = transfer.fee;
       _fromId = transfer.fromAccountId;
       _toId = transfer.toAccountId;
       _date = DateTime(
@@ -65,10 +68,9 @@ class _EditTransferScreenState extends State<EditTransferScreen> {
       );
 
       if (_id == null) {
-        print("EDITING....");
-
         transferProvider.add(
           amount: _amount!,
+          fee: _fee,
           timestamp: timestamp,
           fromId: _fromId!,
           toId: _toId!,
@@ -76,11 +78,10 @@ class _EditTransferScreenState extends State<EditTransferScreen> {
       }
 
       if (_id != null) {
-        print("UPDATING....");
-
         transferProvider.update(
           id: _id!,
           amount: _amount!,
+          fee: _fee,
           timestamp: timestamp,
           fromId: _fromId!,
           toId: _toId!,
@@ -149,6 +150,7 @@ class _EditTransferScreenState extends State<EditTransferScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final accountProvider = context.watch<AccountProvider>();
 
     return Scaffold(
@@ -196,11 +198,23 @@ class _EditTransferScreenState extends State<EditTransferScreen> {
                       labelText: "Amount",
                     ),
                     keyboardType: TextInputType.numberWithOptions(
-                      signed: true,
+                      signed: false,
                       decimal: true,
                     ),
                     onSaved: (value) => _amount = double.tryParse(value!),
                     validator: (value) => _validateAmount(value),
+                  ),
+                  TextFormField(
+                    initialValue: _fee?.toInt().toString(),
+                    decoration: InputStyles.field(
+                      hintText: "Enter fee...",
+                      labelText: "Fee",
+                    ),
+                    keyboardType: TextInputType.numberWithOptions(
+                      signed: false,
+                      decimal: true,
+                    ),
+                    onSaved: (value) => _fee = double.tryParse(value!),
                   ),
                   Row(
                     children: [
@@ -235,35 +249,73 @@ class _EditTransferScreenState extends State<EditTransferScreen> {
                       ),
                     ],
                   ),
-                  DropdownButtonFormField(
+                  SelectFormField(
+                    actions: [
+                      ActionChip(
+                        avatar: Icon(
+                          Icons.add,
+                          color: theme.colorScheme.outline,
+                        ),
+                        label: Text(
+                          "New account",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w100,
+                            color: theme.colorScheme.outline,
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => EditAccountScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                     initialValue: _fromId,
                     decoration: InputStyles.field(
                       labelText: "From",
                       hintText: "Select source account...",
                     ),
-                    items: accounts.map((i) {
-                      return DropdownMenuItem(
-                        value: i.id,
-                        child: Text("${i.holderName}: ${i.name}"),
-                      );
+                    options: accounts.map((i) {
+                      return SelectItem(value: i.id, label: i.displayName());
                     }).toList(),
                     validator: (value) => _validateAccount(value, _toId),
-                    onChanged: (value) => _fromId = value ?? '',
+                    onSaved: (value) => _fromId = value ?? '',
                   ),
-                  DropdownButtonFormField(
+                  SelectFormField(
+                    actions: [
+                      ActionChip(
+                        avatar: Icon(
+                          Icons.add,
+                          color: theme.colorScheme.outline,
+                        ),
+                        label: Text(
+                          "New account",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w100,
+                            color: theme.colorScheme.outline,
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => EditAccountScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                     initialValue: _toId,
                     decoration: InputStyles.field(
                       labelText: "To",
                       hintText: "Select target account...",
                     ),
                     validator: (value) => _validateAccount(value, _fromId),
-                    items: accounts.map((i) {
-                      return DropdownMenuItem(
-                        value: i.id,
-                        child: Text("${i.holderName}: ${i.name}"),
-                      );
+                    options: accounts.map((i) {
+                      return SelectItem(value: i.id, label: i.displayName());
                     }).toList(),
-                    onChanged: (value) => _toId = value ?? '',
+                    onSaved: (value) => _toId = value ?? '',
                   ),
                 ],
               ),

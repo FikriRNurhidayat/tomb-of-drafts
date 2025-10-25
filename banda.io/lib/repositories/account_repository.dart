@@ -80,8 +80,14 @@ class AccountRepository extends Repository {
   }
 
   Future<List<Account>> search() async {
-    final ResultSet rows = db.select("SELECT * FROM accounts");
-    return rows.map((row) => Account.fromRow(row)).toList();
+    try {
+      final ResultSet rows = db.select("SELECT * FROM accounts ORDER BY accounts.name, accounts.holder_name;");
+      return rows.map((row) => Account.fromRow(row)).toList();
+    }
+
+    catch(error) {
+      rethrow;
+    }
   }
 
   Future<void> delete(String id) async {

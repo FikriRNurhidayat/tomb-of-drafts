@@ -7,8 +7,12 @@ class EntryProvider extends ChangeNotifier {
 
   EntryProvider(this._repository);
 
-  Future<List<Entry>> search() async {
-    return _repository.search();
+  Future<List<Entry>> search({Map? specs}) async {
+    return _repository.search(spec: specs);
+  }
+
+  Future<Entry?> get(String id) async {
+    return _repository.get(id);
   }
 
   Future<void> add({
@@ -18,6 +22,7 @@ class EntryProvider extends ChangeNotifier {
     required DateTime timestamp,
     required String accountId,
     required String categoryId,
+    required List<String>? labelIds,
   }) async {
     await _repository.create(
       note: note,
@@ -26,6 +31,7 @@ class EntryProvider extends ChangeNotifier {
       timestamp: timestamp,
       accountId: accountId,
       categoryId: categoryId,
+      labelIds: labelIds,
     );
     notifyListeners();
   }
@@ -38,6 +44,7 @@ class EntryProvider extends ChangeNotifier {
     required DateTime timestamp,
     required String accountId,
     required String categoryId,
+    required List<String>? labelIds,
   }) async {
     await _repository.update(
       id: id,
@@ -47,6 +54,7 @@ class EntryProvider extends ChangeNotifier {
       timestamp: timestamp,
       accountId: accountId,
       categoryId: categoryId,
+      labelIds: labelIds,
     );
     notifyListeners();
   }

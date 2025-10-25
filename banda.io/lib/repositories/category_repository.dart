@@ -35,7 +35,7 @@ class CategoryRepository extends Repository {
 
     db.execute(
       "INSERT INTO categories (id, name, readonly, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
-      [id, name, 1, now.toIso8601String(), now.toIso8601String()],
+      [id, name, 0, now.toIso8601String(), now.toIso8601String()],
     );
 
     return Category(
@@ -73,7 +73,9 @@ class CategoryRepository extends Repository {
   }
 
   Future<List<Category>> search() async {
-    final ResultSet rows = db.select("SELECT * FROM categories");
+    final ResultSet rows = db.select(
+      "SELECT * FROM categories ORDER BY name ASC",
+    );
     return rows.map((row) => Category.fromRow(row)).toList();
   }
 

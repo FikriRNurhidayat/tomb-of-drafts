@@ -8,6 +8,7 @@ import 'package:banda/providers/account_provider.dart';
 import 'package:banda/providers/category_provider.dart';
 import 'package:banda/providers/entry_provider.dart';
 import 'package:banda/providers/label_provider.dart';
+import 'package:banda/views/edit_account_screen.dart';
 import 'package:banda/views/edit_category_screen.dart';
 import 'package:banda/views/edit_label_screen.dart';
 import 'package:banda/widgets/multi_select_form_field.dart';
@@ -31,6 +32,7 @@ class _EditEntryScreenState extends State<EditEntryScreen> {
 
   String? _id;
   String? _note;
+  EntryType? _type;
   EntryStatus? _status;
   double? _amount;
   String? _categoryId;
@@ -50,13 +52,15 @@ class _EditEntryScreenState extends State<EditEntryScreen> {
       _status = entry.status;
       _categoryId = entry.categoryId;
       _accountId = entry.accountId;
-      _amount = entry.amount;
+      _amount = entry.amount.abs();
+      _type = entry.amount >= 0 ? EntryType.income : EntryType.expense;
       _date = DateTime(
         entry.timestamp.year,
         entry.timestamp.month,
         entry.timestamp.day,
       );
       _time = TimeOfDay.fromDateTime(entry.timestamp);
+      _labelIds = entry.labels?.map((i) => i.id).toList() ?? [];
 
       _dateController.text = DateHelper.formatDate(_date!);
       _timeController.text = DateHelper.formatTime(_time!);
@@ -69,6 +73,8 @@ class _EditEntryScreenState extends State<EditEntryScreen> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
+      final sign = _type == EntryType.income ? 1 : -1;
+
       final timestamp = DateTime(
         _date!.year,
         _date!.month,
@@ -80,11 +86,12 @@ class _EditEntryScreenState extends State<EditEntryScreen> {
       if (_id == null) {
         entryProvider.add(
           note: _note!,
-          amount: _amount!,
+          amount: _amount! * sign,
           status: _status!,
           categoryId: _categoryId!,
           accountId: _accountId!,
           timestamp: timestamp,
+          labelIds: _labelIds,
         );
       }
 
@@ -92,11 +99,12 @@ class _EditEntryScreenState extends State<EditEntryScreen> {
         entryProvider.update(
           id: _id!,
           note: _note!,
-          amount: _amount!,
+          amount: _amount! * sign,
           status: _status!,
           categoryId: _categoryId!,
           accountId: _accountId!,
           timestamp: timestamp,
+          labelIds: _labelIds,
         );
       }
 
@@ -163,185 +171,225 @@ class _EditEntryScreenState extends State<EditEntryScreen> {
           ),
         ],
       ),
-      body: FutureBuilder(
-        future: Future.wait([
-          categoryProvider.search(),
-          accountProvider.search(),
-          labelProvider.search(),
-        ]),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: SafeArea(
+        bottom: true,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(16.0),
+          child: FutureBuilder(
+            future: Future.wait([
+              categoryProvider.search(),
+              accountProvider.search(),
+              labelProvider.search(),
+            ]),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-          final categories = snapshot.data![0] as List<Category>;
-          final accounts = snapshot.data![1] as List<Account>;
-          final labels = snapshot.data![2] as List<Label>;
+              final categories = snapshot.data![0] as List<Category>;
+              final accounts = snapshot.data![1] as List<Account>;
+              final labels = snapshot.data![2] as List<Label>;
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                spacing: 16,
-                children: [
-                  TextFormField(
-                    decoration: InputStyles.field(
-                      labelText: "Note",
-                      hintText: "Enter note...",
-                    ),
-                    initialValue: _note,
-                    onSaved: (value) => _note = value ?? '',
-                    validator: (value) =>
-                        value == null || value.isEmpty ? "Enter note" : null,
-                  ),
-                  TextFormField(
-                    decoration: InputStyles.field(
-                      labelText: "Amount",
-                      hintText: "Enter amount...",
-                    ),
-                    initialValue: _amount?.toInt().toString(),
-                    keyboardType: TextInputType.numberWithOptions(
-                      signed: true,
-                      decimal: true,
-                    ),
-                    onSaved: (value) => _amount = double.tryParse(value!),
-                    validator: (value) =>
-                        value == null || value.isEmpty ? "Enter amount" : null,
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          readOnly: true,
-                          controller: _dateController,
-                          onTap: () => _pickDate(),
-                          decoration: InputStyles.field(
-                            labelText: "Date",
-                            hintText: "Select date...",
-                          ),
-                          validator: (value) => value == null || value.isEmpty
-                              ? "Select date"
-                              : null,
-                        ),
+              return Form(
+                key: _formKey,
+                child: Column(
+                  spacing: 16,
+                  children: [
+                    TextFormField(
+                      decoration: InputStyles.field(
+                        labelText: "Note",
+                        hintText: "Enter note...",
                       ),
-                      SizedBox(width: 16),
-                      Expanded(
-                        child: TextFormField(
-                          readOnly: true,
-                          controller: _timeController,
-                          onTap: () => _pickTime(),
-                          decoration: InputStyles.field(
-                            labelText: "Time",
-                            hintText: "Select time...",
-                          ),
-                          validator: (value) => value == null || value.isEmpty
-                              ? "Select time"
-                              : null,
-                        ),
+                      initialValue: _note,
+                      onSaved: (value) => _note = value ?? '',
+                      validator: (value) =>
+                          value == null || value.isEmpty ? "Enter note" : null,
+                    ),
+                    SelectFormField<EntryType>(
+                      initialValue: _type,
+                      decoration: InputStyles.field(
+                        labelText: "Type",
+                        hintText: "Select type...",
                       ),
-                    ],
-                  ),
-                  SelectFormField<EntryStatus>(
-                    initialValue: _status,
-                    decoration: InputStyles.field(
-                      labelText: "Status",
-                      hintText: "Select status...",
+                      onSaved: (value) => _type = value,
+                      options: EntryType.values.map((c) {
+                        return SelectItem(value: c, label: c.label);
+                      }).toList(),
                     ),
-                    onSaved: (value) => _status = value,
-                    options: EntryStatus.values.map((c) {
-                      return SelectItem(value: c, label: c.label);
-                    }).toList(),
-                  ),
-                  SelectFormField<String>(
-                    initialValue: _categoryId,
-                    decoration: InputStyles.field(
-                      labelText: "Category",
-                      hintText: "Select category...",
+                    TextFormField(
+                      decoration: InputStyles.field(
+                        labelText: "Amount",
+                        hintText: "Enter amount...",
+                      ),
+                      initialValue: _amount?.toInt().toString(),
+                      keyboardType: TextInputType.numberWithOptions(
+                        signed: false,
+                        decimal: true,
+                      ),
+                      onSaved: (value) => _amount = double.tryParse(value!),
+                      validator: (value) => value == null || value.isEmpty
+                          ? "Enter amount"
+                          : null,
                     ),
-                    onSaved: (value) => _categoryId = value,
-                    actions: [
-                      ActionChip(
-                        avatar: Icon(
-                          Icons.add,
-                          color: theme.colorScheme.outline,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            readOnly: true,
+                            controller: _dateController,
+                            onTap: () => _pickDate(),
+                            decoration: InputStyles.field(
+                              labelText: "Date",
+                              hintText: "Select date...",
+                            ),
+                            validator: (value) => value == null || value.isEmpty
+                                ? "Select date"
+                                : null,
+                          ),
                         ),
-                        label: Text(
-                          "New category",
-                          style: TextStyle(
-                            fontWeight: FontWeight.w100,
+                        SizedBox(width: 16),
+                        Expanded(
+                          child: TextFormField(
+                            readOnly: true,
+                            controller: _timeController,
+                            onTap: () => _pickTime(),
+                            decoration: InputStyles.field(
+                              labelText: "Time",
+                              hintText: "Select time...",
+                            ),
+                            validator: (value) => value == null || value.isEmpty
+                                ? "Select time"
+                                : null,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SelectFormField<EntryStatus>(
+                      initialValue: _status,
+                      decoration: InputStyles.field(
+                        labelText: "Status",
+                        hintText: "Select status...",
+                      ),
+                      onSaved: (value) => _status = value,
+                      options: EntryStatus.values
+                          .where((c) => c != EntryStatus.unknown)
+                          .map((c) {
+                            return SelectItem(value: c, label: c.label);
+                          })
+                          .toList(),
+                    ),
+                    SelectFormField<String>(
+                      initialValue: _categoryId,
+                      decoration: InputStyles.field(
+                        labelText: "Category",
+                        hintText: "Select category...",
+                      ),
+                      onSaved: (value) => _categoryId = value,
+                      actions: [
+                        ActionChip(
+                          avatar: Icon(
+                            Icons.add,
                             color: theme.colorScheme.outline,
                           ),
-                        ),
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => EditCategoryScreen(),
+                          label: Text(
+                            "New category",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w100,
+                              color: theme.colorScheme.outline,
                             ),
-                          );
-                        },
-                      ),
-                    ],
-                    options: categories.where((c) => !c.readonly).map((c) {
-                      return SelectItem(value: c.id, label: c.name);
-                    }).toList(),
-                  ),
-                  SelectFormField(
-                    decoration: InputStyles.field(
-                      labelText: "Account",
-                      hintText: "Select account...",
-                    ),
-                    initialValue: _accountId,
-                    options: accounts.map((i) {
-                      return SelectItem(
-                        value: i.id,
-                        label: "${i.name} — ${i.holderName}",
-                      );
-                    }).toList(),
-                    onSaved: (value) => _accountId = value ?? '',
-                  ),
-                  MultiSelectFormField<String>(
-                    decoration: InputStyles.field(
-                      labelText: "Labels",
-                      hintText: "Select labels...",
-                    ),
-                    actions: [
-                      ActionChip(
-                        avatar: Icon(
-                          Icons.add,
-                          color: theme.colorScheme.outline,
+                          ),
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => EditCategoryScreen(),
+                              ),
+                            );
+                          },
                         ),
-                        label: Text(
-                          "New label",
-                          style: TextStyle(
-                            fontWeight: FontWeight.w100,
+                      ],
+                      options: categories.where((c) => !c.readonly).map((c) {
+                        return SelectItem(value: c.id, label: c.name);
+                      }).toList(),
+                    ),
+                    SelectFormField(
+                      decoration: InputStyles.field(
+                        labelText: "Account",
+                        hintText: "Select account...",
+                      ),
+                      actions: [
+                        ActionChip(
+                          avatar: Icon(
+                            Icons.add,
                             color: theme.colorScheme.outline,
                           ),
-                        ),
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => EditLabelScreen(),
+                          label: Text(
+                            "New account",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w100,
+                              color: theme.colorScheme.outline,
                             ),
-                          );
-                        },
+                          ),
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => EditAccountScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                      initialValue: _accountId,
+                      options: accounts.map((i) {
+                        return SelectItem(
+                          value: i.id,
+                          label: "${i.name} — ${i.holderName}",
+                        );
+                      }).toList(),
+                      onSaved: (value) => _accountId = value ?? '',
+                    ),
+                    MultiSelectFormField<String>(
+                      decoration: InputStyles.field(
+                        labelText: "Labels",
+                        hintText: "Select labels...",
                       ),
-                    ],
-                    initialValue: _labelIds ?? [],
-                    options: labels.map((l) {
-                      return MultiSelectItem(value: l.id, label: l.name);
-                    }).toList(),
-                    onSaved: (value) => _labelIds = value,
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
+                      actions: [
+                        ActionChip(
+                          avatar: Icon(
+                            Icons.add,
+                            color: theme.colorScheme.outline,
+                          ),
+                          label: Text(
+                            "New label",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w100,
+                              color: theme.colorScheme.outline,
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => EditLabelScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                      initialValue: _labelIds ?? [],
+                      options: labels.map((l) {
+                        return MultiSelectItem(value: l.id, label: l.name);
+                      }).toList(),
+                      onSaved: (value) => _labelIds = value,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }

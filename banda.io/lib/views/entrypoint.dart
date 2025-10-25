@@ -72,6 +72,7 @@ class _EntrypointState extends State<Entrypoint> {
     ViewScreen(
       title: AnalyticScreen.title,
       icon: AnalyticScreen.icon,
+      actionsBuilder: AnalyticScreen.actionsBuilder,
       child: AnalyticScreen(),
     ),
     ViewScreen(

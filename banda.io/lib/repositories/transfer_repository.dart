@@ -17,6 +17,7 @@ class TransferRepository extends Repository {
     required DateTime timestamp,
     required String fromId,
     required String toId,
+    double? fee,
   }) async {
     final id = Repository.getId();
     final now = DateTime.now();
@@ -29,6 +30,7 @@ class TransferRepository extends Repository {
         timestamp: timestamp,
         now: now,
         amount: amount,
+        fee: fee,
       );
 
       final fromEntry = preps["fromEntry"];
@@ -39,11 +41,12 @@ class TransferRepository extends Repository {
       await _insertEntry(toEntry);
 
       db.execute(
-        "INSERT INTO transfers (id, note, amount, timestamp, from_entry_id, to_entry_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO transfers (id, note, amount, fee, timestamp, from_entry_id, to_entry_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           id,
           note,
           amount,
+          fee,
           timestamp.toIso8601String(),
           fromEntry["id"],
           toEntry["id"],
@@ -53,9 +56,7 @@ class TransferRepository extends Repository {
       );
 
       db.execute('COMMIT');
-    } catch (e) {
-      print(e);
-
+    } catch (error) {
       db.execute('ROLLBACK');
     }
 
@@ -68,6 +69,7 @@ class TransferRepository extends Repository {
     required DateTime timestamp,
     required String fromId,
     required String toId,
+    double? fee,
   }) async {
     final now = DateTime.now();
 
@@ -82,6 +84,7 @@ class TransferRepository extends Repository {
         timestamp: timestamp,
         now: now,
         amount: amount,
+        fee: fee,
       );
 
       final fromEntry = preps["fromEntry"];
@@ -97,10 +100,11 @@ class TransferRepository extends Repository {
       await _insertEntry(toEntry);
 
       db.execute(
-        "UPDATE transfers SET note = ?, amount = ?, from_entry_id = ?, to_entry_id = ?,timestamp = ?, updated_at = ? WHERE id = ?",
+        "UPDATE transfers SET note = ?, amount = ?, fee = ?, from_entry_id = ?, to_entry_id = ?,timestamp = ?, updated_at = ? WHERE id = ?",
         [
           note,
           amount,
+          fee,
           fromEntry["id"],
           toEntry["id"],
           timestamp.toIso8601String(),
@@ -125,6 +129,7 @@ class TransferRepository extends Repository {
         transfers.id,
         transfers.note,
         transfers.amount,
+        transfers.fee,
         transfers.timestamp,
         from_accounts.id AS from_account_id,
         from_accounts.name AS from_account_name,
@@ -157,6 +162,7 @@ class TransferRepository extends Repository {
           transfers.id,
           transfers.note,
           transfers.amount,
+          transfers.fee,
           transfers.timestamp,
           from_accounts.id AS from_account_id,
           from_accounts.name AS from_account_name,
@@ -242,6 +248,7 @@ class TransferRepository extends Repository {
     required DateTime timestamp,
     required DateTime now,
     required double amount,
+    double? fee,
   }) async {
     final category = await _getCategoryByName("Transfer");
     if (category == null) {
@@ -258,15 +265,16 @@ class TransferRepository extends Repository {
       throw UnimplementedError();
     }
 
-    final fromName = "${fromAccount["holder_name"]}: ${fromAccount["name"]}";
-    final toName = "${toAccount["holder_name"]}: ${toAccount["name"]}";
+    final fromName = "${fromAccount["name"]} — ${fromAccount["holder_name"]}";
+    final toName = "${toAccount["name"]} — ${toAccount["holder_name"]}";
+    final entryAmount = amount + (fee ?? 0);
 
     final note = "Transfer from $fromName to $toName";
 
     final Map<String, dynamic> fromEntry = {
       "id": Uuid().v4(),
       "note": "Transfer to $toName",
-      "amount": amount * -1,
+      "amount": entryAmount * -1,
       "status": EntryStatus.done.label,
       "readonly": true,
       "timestamp": timestamp.toIso8601String(),
@@ -279,7 +287,7 @@ class TransferRepository extends Repository {
     final Map<String, dynamic> toEntry = {
       "id": Uuid().v4(),
       "note": "Transfer from $fromName",
-      "amount": amount,
+      "amount": entryAmount,
       "status": EntryStatus.done.label,
       "readonly": true,
       "timestamp": timestamp.toIso8601String(),

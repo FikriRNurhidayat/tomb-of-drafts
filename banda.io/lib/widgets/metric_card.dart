@@ -33,7 +33,7 @@ class MetricCard extends StatelessWidget {
             ),
             Text(
               label,
-              style: theme.textTheme.bodyMedium!,
+              style: theme.textTheme.labelSmall!,
               textAlign: TextAlign.center,
             ),
           ],

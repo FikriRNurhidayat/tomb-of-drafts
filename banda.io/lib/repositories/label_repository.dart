@@ -11,14 +11,19 @@ class LabelRepository extends Repository {
   }
 
   Future<Label> create({required String name}) async {
-    final id = Repository.getId();
-    final now = DateTime.now();
+    try {
+      final id = Repository.getId();
+      final now = DateTime.now();
 
-    db.execute(
-      "INSERT INTO labels (id, name, created_at, updated) VALUES (?, ?, ?, ?)",
-    );
+      db.execute(
+        "INSERT INTO labels (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)",
+        [id, name, now.toIso8601String(), now.toIso8601String()],
+      );
 
-    return Label(id: id, name: name, createdAt: now, updatedAt: now);
+      return Label(id: id, name: name, createdAt: now, updatedAt: now);
+    } catch (error) {
+      rethrow;
+    }
   }
 
   Future<Label?> update({required String id, required String name}) async {
@@ -43,7 +48,7 @@ class LabelRepository extends Repository {
   }
 
   Future<List<Label>> search() async {
-    final ResultSet rows = db.select("SELECT * FROM labels");
+    final ResultSet rows = db.select("SELECT * FROM labels ORDER BY name ASC");
     return rows.map((row) => Label.fromRow(row)).toList();
   }
 

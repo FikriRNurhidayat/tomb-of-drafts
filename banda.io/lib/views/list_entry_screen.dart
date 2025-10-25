@@ -1,5 +1,6 @@
 import 'package:banda/entity/entry.dart';
 import 'package:banda/providers/entry_provider.dart';
+import 'package:banda/providers/filter_provider.dart';
 import 'package:banda/views/edit_entry_screen.dart';
 import 'package:banda/views/filter_entry_screen.dart';
 import 'package:banda/widgets/empty.dart';
@@ -17,12 +18,24 @@ class ListEntryScreen extends StatefulWidget {
   static IconData icon = Icons.book;
 
   static List<Widget> actionsBuilder(BuildContext context) {
+    final filterProvider = context.watch<FilterProvider>();
+    final filter = filterProvider.get();
+
     return [
+      if (filter != null)
+        IconButton(
+          onPressed: () {
+            filterProvider.reset();
+          },
+          icon: Icon(Icons.close),
+        ),
       IconButton(
         onPressed: () {
-          Navigator.of(
-            context,
-          ).push(MaterialPageRoute(builder: (_) => FilterEntryScreen()));
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => FilterEntryScreen(specs: filterProvider.get()),
+            ),
+          );
         },
         icon: Icon(Icons.filter_list_alt),
       ),
@@ -46,15 +59,16 @@ class _ListEntryScreenState extends State<ListEntryScreen> {
   @override
   Widget build(BuildContext context) {
     final entryProvider = context.watch<EntryProvider>();
+    final filterProvider = context.watch<FilterProvider>();
 
     return FutureBuilder(
-      future: entryProvider.search(),
+      future: entryProvider.search(specs: filterProvider.get()),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Empty(
               "Ledger entries you add appear here.",
-              icon: Icons.receipt,
+              icon: Icons.book,
             );
           }
 

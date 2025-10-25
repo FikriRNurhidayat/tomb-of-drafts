@@ -22,6 +22,9 @@ class EntryTile extends StatelessWidget {
 
     return ListTile(
       dense: true,
+      tileColor: entry.readonly ? theme.colorScheme.surfaceContainer : null,
+      enableFeedback: !entry.readonly,
+      enabled: !entry.readonly,
       onLongPress: !entry.readonly
           ? () {
               showDialog(
@@ -41,11 +44,12 @@ class EntryTile extends StatelessWidget {
                       ),
                       TextButton(
                         onPressed: () {
+                          final navigator = Navigator.of(context);
                           final entryProvider = context.read<EntryProvider>();
 
-                          entryProvider.remove(entry.id);
-
-                          Navigator.of(context).pop();
+                          entryProvider.remove(entry.id).then((_) {
+                            navigator.pop();
+                          });
                         },
                         child: const Text('Yes'),
                       ),
@@ -57,13 +61,15 @@ class EntryTile extends StatelessWidget {
           : null,
       onTap: !entry.readonly
           ? () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  fullscreenDialog: true,
-                  builder: (_) => EditEntryScreen(entry: entry),
-                ),
-              );
+              final navigator = Navigator.of(context);
+              context.read<EntryProvider>().get(entry.id).then((entry) {
+                navigator.push(
+                  MaterialPageRoute(
+                    fullscreenDialog: true,
+                    builder: (_) => EditEntryScreen(entry: entry),
+                  ),
+                );
+              });
             }
           : null,
       title: Text(entry.categoryName, style: theme.textTheme.titleSmall),
@@ -72,7 +78,7 @@ class EntryTile extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Text(
-            entry.accountName,
+            "${entry.accountName} — ${entry.accountHolderName}",
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodySmall,
           ),

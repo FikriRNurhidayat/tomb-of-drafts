@@ -26,6 +26,10 @@ class Account {
     this.balance,
   });
 
+  displayName() {
+    return "$name — $holderName";
+  }
+
   factory Account.fromRow(Map<dynamic, dynamic> row) {
     return Account(
       id: row["id"],
